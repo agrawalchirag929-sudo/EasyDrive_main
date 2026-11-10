@@ -1,0 +1,494 @@
+[
+  {
+    "id": "maruti-swift",
+    "brand": "Maruti Suzuki",
+    "name": "Swift ZXi+",
+    "type": "Hatchback",
+    "fuel": "Petrol",
+    "transmission": "Manual",
+    "seats": 5,
+    "pricePerDay": 1399,
+    "kmPerDay": 250,
+    "extraKmRate": 9,
+    "mileage": "22.5 km/l",
+    "rating": 4.8,
+    "features": [
+      "SmartPlay Touchscreen",
+      "Rear Camera",
+      "Android Auto & Apple CarPlay",
+      "Dual Airbags",
+      "Cruise Control"
+    ],
+    "badge": "Popular Economy",
+    "credit": "Demo image",
+    "image": "assets/cars/maruti-swift.webp",
+    "cities": [
+      "Delhi NCR",
+      "Mumbai",
+      "Bengaluru",
+      "Chennai",
+      "Kolkata",
+      "Hyderabad",
+      "Pune",
+      "Ahmedabad"
+    ],
+    "pickupLocations": [
+      "Airport Terminal",
+      "Main Railway Station",
+      "City Centre Hub"
+    ],
+    "securityDeposit": 2000,
+    "isFeatured": true
+  },
+  {
+    "id": "hyundai-i20",
+    "brand": "Hyundai",
+    "name": "i20 Asta (O)",
+    "type": "Hatchback",
+    "fuel": "Petrol",
+    "transmission": "Manual",
+    "seats": 5,
+    "pricePerDay": 1599,
+    "kmPerDay": 250,
+    "extraKmRate": 10,
+    "mileage": "20.3 km/l",
+    "rating": 4.7,
+    "features": [
+      "10.25-inch Touchscreen",
+      "Bose 7-Speaker Sound",
+      "Electric Sunroof",
+      "Air Purifier",
+      "Wireless Phone Charger"
+    ],
+    "badge": "Premium Hatch",
+    "credit": "Demo image",
+    "image": "assets/cars/hyundai-i20.webp",
+    "cities": [
+      "Delhi NCR",
+      "Mumbai",
+      "Bengaluru",
+      "Chennai",
+      "Kolkata",
+      "Hyderabad",
+      "Pune",
+      "Ahmedabad"
+    ],
+    "pickupLocations": [
+      "Airport Terminal",
+      "Main Railway Station",
+      "City Centre Hub"
+    ],
+    "securityDeposit": 2500,
+    "isFeatured": false
+  },
+  {
+    "id": "honda-city",
+    "brand": "Honda",
+    "name": "City ZX",
+    "type": "Sedan",
+    "fuel": "Petrol",
+    "transmission": "Automatic",
+    "seats": 5,
+    "pricePerDay": 2399,
+    "kmPerDay": 250,
+    "extraKmRate": 12,
+    "mileage": "18.4 km/l",
+    "rating": 4.8,
+    "features": [
+      "LaneWatch Blindspot Camera",
+      "One-touch Sunroof",
+      "Plush Leather Upholstery",
+      "8-Speaker Premium Sound",
+      "Remote Engine Start"
+    ],
+    "badge": "Executive Comfort",
+    "credit": "Demo image",
+    "image": "assets/cars/honda-city.webp",
+    "cities": [
+      "Delhi NCR",
+      "Mumbai",
+      "Bengaluru",
+      "Chennai",
+      "Kolkata",
+      "Hyderabad",
+      "Pune",
+      "Ahmedabad"
+    ],
+    "pickupLocations": [
+      "Airport Terminal",
+      "Main Railway Station",
+      "City Centre Hub"
+    ],
+    "securityDeposit": 3500,
+    "isFeatured": true
+  },
+  {
+    "id": "hyundai-verna",
+    "brand": "Hyundai",
+    "name": "Verna SX (O) Turbo",
+    "type": "Sedan",
+    "fuel": "Petrol",
+    "transmission": "Automatic",
+    "seats": 5,
+    "pricePerDay": 2599,
+    "kmPerDay": 250,
+    "extraKmRate": 13,
+    "mileage": "19.2 km/l",
+    "rating": 4.8,
+    "features": [
+      "160 PS 1.5L Turbo Engine",
+      "Heated & Cooled Seats",
+      "64-Color Ambient Light",
+      "Bose 8-Speaker Audio",
+      "ADAS Level 2"
+    ],
+    "badge": "Turbo Sedan",
+    "credit": "Demo image",
+    "image": "assets/cars/hyundai-verna.webp",
+    "cities": [
+      "Delhi NCR",
+      "Mumbai",
+      "Bengaluru",
+      "Chennai",
+      "Kolkata",
+      "Hyderabad",
+      "Pune",
+      "Ahmedabad"
+    ],
+    "pickupLocations": [
+      "Airport Terminal",
+      "Main Railway Station",
+      "City Centre Hub"
+    ],
+    "securityDeposit": 3500,
+    "isFeatured": false
+  },
+  {
+    "id": "hyundai-creta",
+    "brand": "Hyundai",
+    "name": "Creta SX (O)",
+    "type": "SUV",
+    "fuel": "Diesel",
+    "transmission": "Automatic",
+    "seats": 5,
+    "pricePerDay": 2799,
+    "kmPerDay": 250,
+    "extraKmRate": 14,
+    "mileage": "19.1 km/l",
+    "rating": 4.9,
+    "features": [
+      "Panoramic Sunroof",
+      "Ventilated Front Seats",
+      "Bose 8-Speaker Audio",
+      "ADAS Level 2",
+      "Wireless Charging"
+    ],
+    "badge": "Top Rated SUV",
+    "credit": "Demo image",
+    "image": "assets/cars/hyundai-creta.webp",
+    "cities": [
+      "Delhi NCR",
+      "Mumbai",
+      "Bengaluru",
+      "Chennai",
+      "Kolkata",
+      "Hyderabad",
+      "Pune",
+      "Ahmedabad"
+    ],
+    "pickupLocations": [
+      "Airport Terminal",
+      "Main Railway Station",
+      "City Centre Hub"
+    ],
+    "securityDeposit": 4000,
+    "isFeatured": true
+  },
+  {
+    "id": "mahindra-thar",
+    "brand": "Mahindra",
+    "name": "Thar LX 4x4",
+    "type": "SUV",
+    "fuel": "Diesel",
+    "transmission": "Manual",
+    "seats": 4,
+    "pricePerDay": 3299,
+    "kmPerDay": 250,
+    "extraKmRate": 15,
+    "mileage": "15.2 km/l",
+    "rating": 4.9,
+    "features": [
+      "Convertible Hard Top",
+      "Shift-on-the-fly 4WD",
+      "Roll Cage Protection",
+      "Touchscreen Display",
+      "Water-Resistant Controls"
+    ],
+    "badge": "4x4 Adventure",
+    "credit": "Demo image",
+    "image": "assets/cars/mahindra-thar.webp",
+    "cities": [
+      "Delhi NCR",
+      "Mumbai",
+      "Bengaluru",
+      "Chennai",
+      "Kolkata",
+      "Hyderabad",
+      "Pune",
+      "Ahmedabad"
+    ],
+    "pickupLocations": [
+      "Airport Terminal",
+      "Main Railway Station",
+      "City Centre Hub"
+    ],
+    "securityDeposit": 5000,
+    "isFeatured": true
+  },
+  {
+    "id": "mahindra-xuv700",
+    "brand": "Mahindra",
+    "name": "XUV700 AX7 Luxury",
+    "type": "SUV",
+    "fuel": "Diesel",
+    "transmission": "Automatic",
+    "seats": 7,
+    "pricePerDay": 3999,
+    "kmPerDay": 250,
+    "extraKmRate": 16,
+    "mileage": "16.5 km/l",
+    "rating": 4.9,
+    "features": [
+      "Sony 3D Sound with 12 Speakers",
+      "Level 2 ADAS Suite",
+      "Panoramic Skyroof",
+      "Electronic Park Brake",
+      "Smart Door Handles"
+    ],
+    "badge": "7-Seater Luxury",
+    "credit": "Demo image",
+    "image": "assets/cars/mahindra-xuv700.webp",
+    "cities": [
+      "Delhi NCR",
+      "Mumbai",
+      "Bengaluru",
+      "Chennai",
+      "Kolkata",
+      "Hyderabad",
+      "Pune",
+      "Ahmedabad"
+    ],
+    "pickupLocations": [
+      "Airport Terminal",
+      "Main Railway Station",
+      "City Centre Hub"
+    ],
+    "securityDeposit": 5500,
+    "isFeatured": true
+  },
+  {
+    "id": "toyota-fortuner",
+    "brand": "Toyota",
+    "name": "Fortuner 4x4 AT",
+    "type": "SUV",
+    "fuel": "Diesel",
+    "transmission": "Automatic",
+    "seats": 7,
+    "pricePerDay": 4899,
+    "kmPerDay": 250,
+    "extraKmRate": 18,
+    "mileage": "14.2 km/l",
+    "rating": 4.9,
+    "features": [
+      "Selectable 4WD with High/Low Range",
+      "11-Speaker JBL Audio",
+      "Ventilated Front Seats",
+      "Downhill Assist Control",
+      "Dual Zone Auto AC"
+    ],
+    "badge": "Rugged Power",
+    "credit": "Demo image",
+    "image": "assets/cars/toyota-fortuner.webp",
+    "cities": [
+      "Delhi NCR",
+      "Mumbai",
+      "Bengaluru",
+      "Chennai",
+      "Kolkata",
+      "Hyderabad",
+      "Pune",
+      "Ahmedabad"
+    ],
+    "pickupLocations": [
+      "Airport Terminal",
+      "Main Railway Station",
+      "City Centre Hub"
+    ],
+    "securityDeposit": 7000,
+    "isFeatured": false
+  },
+  {
+    "id": "toyota-innova-crysta",
+    "brand": "Toyota",
+    "name": "Innova Crysta ZX",
+    "type": "MPV",
+    "fuel": "Diesel",
+    "transmission": "Automatic",
+    "seats": 7,
+    "pricePerDay": 3899,
+    "kmPerDay": 250,
+    "extraKmRate": 15,
+    "mileage": "15.6 km/l",
+    "rating": 4.9,
+    "features": [
+      "Captain Seats (2nd Row)",
+      "7 Airbags",
+      "Ambient Mood Lighting",
+      "Cruise Control",
+      "Ultra-Silent Cabin"
+    ],
+    "badge": "Family Travel",
+    "credit": "Demo image",
+    "image": "assets/cars/toyota-innova-crysta.webp",
+    "cities": [
+      "Delhi NCR",
+      "Mumbai",
+      "Bengaluru",
+      "Chennai",
+      "Kolkata",
+      "Hyderabad",
+      "Pune",
+      "Ahmedabad"
+    ],
+    "pickupLocations": [
+      "Airport Terminal",
+      "Main Railway Station",
+      "City Centre Hub"
+    ],
+    "securityDeposit": 5000,
+    "isFeatured": true
+  },
+  {
+    "id": "tata-nexon-ev",
+    "brand": "Tata Motors",
+    "name": "Nexon EV Empowered",
+    "type": "EV",
+    "fuel": "Electric",
+    "transmission": "Automatic",
+    "seats": 5,
+    "pricePerDay": 2699,
+    "kmPerDay": 250,
+    "extraKmRate": 11,
+    "mileage": "465 km Range",
+    "rating": 4.8,
+    "features": [
+      "Fast DC Charging Support",
+      "360-degree Camera",
+      "Connected Car Tech (iRA)",
+      "Air Purifier",
+      "Paddle Shifters for Regen"
+    ],
+    "badge": "Zero Emissions",
+    "credit": "Demo image",
+    "image": "assets/cars/tata-nexon-ev.webp",
+    "cities": [
+      "Delhi NCR",
+      "Mumbai",
+      "Bengaluru",
+      "Chennai",
+      "Kolkata",
+      "Hyderabad",
+      "Pune",
+      "Ahmedabad"
+    ],
+    "pickupLocations": [
+      "Airport Terminal",
+      "Main Railway Station",
+      "City Centre Hub"
+    ],
+    "securityDeposit": 3500,
+    "isFeatured": true
+  },
+  {
+    "id": "mg-zs-ev",
+    "brand": "MG",
+    "name": "ZS EV Exclusive Plus",
+    "type": "EV",
+    "fuel": "Electric",
+    "transmission": "Automatic",
+    "seats": 5,
+    "pricePerDay": 3199,
+    "kmPerDay": 250,
+    "extraKmRate": 12,
+    "mileage": "461 km Range",
+    "rating": 4.8,
+    "features": [
+      "50.3 kWh Prismatic Battery",
+      "i-SMART with 75+ Connected Features",
+      "360-degree Around View",
+      "Panoramic Sky Roof",
+      "PM 2.5 Air Filter"
+    ],
+    "badge": "Electric Tourer",
+    "credit": "Demo image",
+    "image": "assets/cars/mg-zs-ev.webp",
+    "cities": [
+      "Delhi NCR",
+      "Mumbai",
+      "Bengaluru",
+      "Chennai",
+      "Kolkata",
+      "Hyderabad",
+      "Pune",
+      "Ahmedabad"
+    ],
+    "pickupLocations": [
+      "Airport Terminal",
+      "Main Railway Station",
+      "City Centre Hub"
+    ],
+    "securityDeposit": 4000,
+    "isFeatured": false
+  },
+  {
+    "id": "mercedes-c-class",
+    "brand": "Mercedes-Benz",
+    "name": "C-Class C200",
+    "type": "Luxury",
+    "fuel": "Petrol",
+    "transmission": "Automatic",
+    "seats": 5,
+    "pricePerDay": 7999,
+    "kmPerDay": 250,
+    "extraKmRate": 25,
+    "mileage": "16.9 km/l",
+    "rating": 5.0,
+    "features": [
+      "Burmester 3D Surround Sound",
+      "Panoramic Sliding Sunroof",
+      "MBUX Interior Assistant",
+      "Memory Seats",
+      "Active Brake Assist"
+    ],
+    "badge": "German Luxury",
+    "credit": "Demo image",
+    "image": "assets/cars/mercedes-c-class.webp",
+    "cities": [
+      "Delhi NCR",
+      "Mumbai",
+      "Bengaluru",
+      "Chennai",
+      "Kolkata",
+      "Hyderabad",
+      "Pune",
+      "Ahmedabad"
+    ],
+    "pickupLocations": [
+      "Airport Terminal",
+      "Main Railway Station",
+      "City Centre Hub"
+    ],
+    "securityDeposit": 12000,
+    "isFeatured": false
+  }
+]

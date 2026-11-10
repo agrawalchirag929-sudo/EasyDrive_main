@@ -1,0 +1,287 @@
+/**
+ * EasyDrive Interaction Effects (css/effects.css)
+ * -----------------------------------------------------------
+ * Phase 1j Interaction System:
+ * 1. Card Hover Zoom (@media (hover:hover) and (pointer:fine))
+ * 2. Page Fade and Slide (280ms ease opacity 0->1, translateY 10px->0)
+ * 3. Image Fade-In (opacity 0->1, blur(8px)->0 over 600ms, skeleton shimmer)
+ * 4. Button Feedback (soft shadow on hover, active scale(.95), arrow nudge 4px)
+ * 5. Sticky Filter Bar (>= 900px, blur 14px, translucent backdrop when scrolled > 6px)
+ * 6. Card Spotlight (radial-gradient following --mx, --my on hover)
+ * 7. Accessibility: prefers-reduced-motion resets transforms, shimmer, and blur
+ */
+
+/* =========================================================
+ * 1. CARD HOVER ZOOM & SPOTLIGHT (@media (hover:hover))
+ * ========================================================= */
+@media (hover: hover) and (pointer: fine) {
+  .car-card {
+    position: relative;
+    transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.35s ease, border-color var(--transition-base);
+  }
+
+  .car-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+    border-color: var(--card-hover-border);
+  }
+
+  [data-theme="light"] .car-card:hover {
+    box-shadow: 0 14px 30px rgba(16, 24, 32, 0.14);
+  }
+
+  /* Reset inner img hover scale so only wrapper zooms */
+  .car-card:hover .car-card-img {
+    transform: none;
+  }
+
+  /* Card Image Zoom Wrapper */
+  .car-img-zoom-wrap {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+    will-change: transform;
+  }
+
+  .car-card:hover .car-img-zoom-wrap {
+    transform: scale(1.06);
+  }
+
+  /* 6. Card Spotlight */
+  .car-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(240px circle at var(--mx, -9999px) var(--my, -9999px), rgba(217, 119, 54, 0.20), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    z-index: 1;
+  }
+
+  .car-card:hover::after {
+    opacity: 1;
+  }
+
+  /* Keep content and interactive controls above spotlight */
+  .car-card-body {
+    position: relative;
+    z-index: 2;
+  }
+
+  .car-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 2;
+    max-width: calc(100% - 110px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .car-media-actions {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 2;
+    display: flex;
+    gap: 8px;
+  }
+}
+
+/* =========================================================
+ * 2. PAGE FADE AND SLIDE
+ * ========================================================= */
+.page-fade-in {
+  animation: pageFadeSlide 280ms ease forwards;
+}
+
+@keyframes pageFadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+ * 3. IMAGE FADE-IN & SKELETON
+ * ========================================================= */
+.car-card-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background-color: var(--car-stage, #F4EFE9);
+}
+
+.car-img-skeleton {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@keyframes imgFadeFailsafe {
+  to {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+.car-card-img.is-loading {
+  opacity: 0;
+  filter: blur(8px);
+  animation: imgFadeFailsafe 0.01s 0.6s forwards;
+}
+
+.car-card-img.loaded {
+  opacity: 1;
+  filter: blur(0);
+  transition: opacity 600ms ease, filter 600ms ease;
+}
+
+.car-card-img.instant-loaded {
+  opacity: 1;
+  filter: none !important;
+  transition: none !important;
+}
+
+/* =========================================================
+ * 4. BUTTON FEEDBACK
+ * ========================================================= */
+@media (hover: hover) and (pointer: fine) {
+  .btn-brand:hover {
+    box-shadow: 0 6px 16px rgba(217, 119, 54, 0.35);
+  }
+}
+
+.btn-brand:active {
+  transform: scale(0.95);
+  transition: transform 0.12s ease;
+}
+
+/* Nudge arrow 4px to the right on hover */
+.btn-arrow {
+  display: inline-block;
+  transition: transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover .btn-arrow {
+    transform: translateX(4px);
+  }
+}
+
+/* =========================================================
+ * 5. STICKY FILTER BAR (900px and above only)
+ * ========================================================= */
+@media (min-width: 900px) {
+  .catalogue-sticky-sentinel {
+    height: 1px;
+    width: 100%;
+    margin-top: -1px;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .catalogue-sticky-filter-bar {
+    position: sticky;
+    top: 0;
+    z-index: 80; /* below modal z-index: 2000 */
+    padding: var(--space-2) 0;
+    transition: background-color 0.25s ease, backdrop-filter 0.25s ease, -webkit-backdrop-filter 0.25s ease, box-shadow 0.25s ease, padding 0.25s ease;
+  }
+
+  .catalogue-sticky-filter-bar.is-stuck {
+    background: rgba(11, 18, 24, 0.78);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-3);
+  }
+
+  [data-theme="light"] .catalogue-sticky-filter-bar.is-stuck {
+    background: rgba(245, 243, 238, 0.78);
+    box-shadow: 0 4px 20px rgba(16, 24, 32, 0.08);
+  }
+}
+
+@media (max-width: 899.98px) {
+  .catalogue-sticky-filter-bar {
+    position: static;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* =========================================================
+ * 7. PREFERS-REDUCED-MOTION (Accessibility Standard)
+ * ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .page-fade-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .car-img-zoom-wrap {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .car-card:hover {
+    transform: none !important;
+  }
+
+  .btn-brand:active {
+    transform: none !important;
+  }
+
+  .btn-arrow {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .car-card-img.is-loading {
+    opacity: 0 !important;
+    filter: none !important;
+    transition: none !important;
+  }
+
+  .car-card-img.loaded,
+  .car-card-img.instant-loaded {
+    opacity: 1 !important;
+    filter: none !important;
+    transition: none !important;
+  }
+
+  .skeleton {
+    animation: none !important;
+  }
+}

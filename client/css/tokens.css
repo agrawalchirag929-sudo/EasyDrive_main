@@ -1,0 +1,148 @@
+/**
+ * EasyDrive Design Tokens (tokens.css)
+ * -----------------------------------------------------------
+ * Clean, warm, premium brand palette:
+ * - Brand Accent: #D97736 (warm terracotta orange for buttons, active states, accents, large text)
+ * - Brand Text (WCAG AA Contrast for small text):
+ *     Dark Mode:  #D97736
+ *     Light Mode: #A8501A (ensures >= 4.5:1 contrast against #FFFFFF and #F5F3EE)
+ * - Light Mode: bg #F5F3EE, surface #FFFFFF, text #101820, muted #55636E, border #E4DFD3
+ * - Dark Mode:  bg #0B1218, surface #101820, text #F5F3EE, muted #9AA8B3, border #22313D
+ * - On-Brand Text: #101820 (dark high-contrast text on orange CTA buttons)
+ * - Typography: Outfit (headings, wordmark), DM Sans (body)
+ * - Restrained Glow Tokens: --glow-hero, --glow-soft, --shadow-brand
+ */
+
+:root {
+  /* =========================================================
+   * 1. BRAND ACCENT & UNIVERSAL TOKENS
+   * ========================================================= */
+  --brand: #D97736;                 /* Warm Terracotta Orange (buttons, icons, large text) */
+  --brand-hover: #C56527;           /* Hover / Active Orange */
+  --brand-light: rgba(217, 119, 54, 0.12); /* Subtle Orange Tint */
+  --brand-text: #D97736;            /* High-contrast brand text in dark mode */
+  --on-brand: #101820;              /* High-contrast dark text on orange buttons */
+
+  --success: #22C55E;               /* Success state */
+  --error: #EF4444;                 /* Error state */
+  --warning: #F59E0B;               /* Warning badge */
+
+  /* =========================================================
+   * 2. TYPOGRAPHY (Outfit for headings, DM Sans for body)
+   * ========================================================= */
+  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  --text-xs: 0.75rem;     /* 12px */
+  --text-sm: 0.875rem;    /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg: 1.125rem;    /* 18px */
+  --text-xl: 1.25rem;     /* 20px */
+  --text-2xl: 1.5rem;     /* 24px */
+  --text-3xl: 1.875rem;   /* 30px */
+  --text-4xl: 2.25rem;    /* 36px */
+  --text-5xl: 3rem;       /* 48px */
+
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extrabold: 800;
+
+  /* =========================================================
+   * 3. SPACING & RADIUS
+   * ========================================================= */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 72px;
+  --bottom-nav-height: 64px;
+  --mobile-header-height: 58px;
+  --max-content-width: 1200px;
+
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* =========================================================
+   * 4. DEFAULT THEME: DARK MODE (#0B1218 / #101820)
+   * ========================================================= */
+  --bg: #0B1218;
+  --surface: #101820;
+  --surface-elevated: #16202A;
+  --surface-glass: rgba(16, 24, 32, 0.90);
+  --text: #F5F3EE;
+  --muted: #9AA8B3;
+  --border: #22313D;
+  --border-focus: #D97736;
+  --card-hover-border: rgba(217, 119, 54, 0.45);
+  --car-stage: #F4EFE9;             /* Studio cream car stage backdrop */
+
+  /* Logo variables for Dark Mode */
+  --logo-window: #F5F3EE;
+  --logo-wheel: #101820;
+  --logo-ring: #F5F3EE;
+
+  /* Restrained Glow Tokens (Dark Mode) */
+  --glow-hero: radial-gradient(circle at 50% 32%, rgba(217, 119, 54, 0.16) 0%, transparent 65%);
+  --glow-soft: 0 0 20px rgba(217, 119, 54, 0.16);
+  --shadow-brand: 0 4px 18px rgba(217, 119, 54, 0.35);
+  --card-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 20px rgba(217, 119, 54, 0.16);
+  --headline-shadow: 0 0 22px rgba(217, 119, 54, 0.28);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.6);
+}
+
+/* =========================================================
+ * 5. LIGHT THEME (#F5F3EE / #FFFFFF)
+ * ========================================================= */
+[data-theme="light"] {
+  --bg: #F5F3EE;
+  --surface: #FFFFFF;
+  --surface-elevated: #EDEAE3;
+  --surface-glass: rgba(255, 255, 255, 0.92);
+  --text: #101820;
+  --muted: #55636E;
+  --border: #E4DFD3;
+  --border-focus: #D97736;
+  --card-hover-border: rgba(217, 119, 54, 0.5);
+  --car-stage: #F4EFE9;
+
+  /* WCAG AA contrast for small orange text against light surfaces */
+  --brand-text: #A8501A;
+
+  /* Logo variables for Light Mode */
+  --logo-window: #101820;
+  --logo-wheel: #F5F3EE;
+  --logo-ring: #101820;
+
+  /* Restrained Glow Tokens (Light Mode - warm tinted shadow instead of glow) */
+  --glow-hero: radial-gradient(circle at 50% 32%, rgba(217, 119, 54, 0.18) 0%, transparent 65%);
+  --glow-soft: 0 0 16px rgba(217, 119, 54, 0.22);
+  --shadow-brand: 0 4px 16px rgba(217, 119, 54, 0.25);
+  --card-hover-shadow: 0 8px 24px rgba(217, 119, 54, 0.25);
+  --headline-shadow: none;
+
+  --shadow-sm: 0 1px 3px rgba(16, 24, 32, 0.05);
+  --shadow-md: 0 4px 14px rgba(16, 24, 32, 0.08);
+  --shadow-lg: 0 12px 32px rgba(16, 24, 32, 0.12);
+}

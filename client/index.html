@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+  <!-- Primary Meta Tags & SEO -->
+  <title>EasyDrive | Premium Self-Drive Car Rental Platform</title>
+  <meta name="title" content="EasyDrive | Premium Self-Drive Car Rental Platform" />
+  <meta name="description" content="Rent premium cars across 8 Indian metropolitan cities. 250 km/day included, transparent pricing, and 24x7 roadside support." />
+  <meta name="theme-color" content="#0B1218" />
+
+  <!-- Google Fonts: Outfit (Headings & Wordmark) & DM Sans (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/tokens.css?v=1g" />
+  <link rel="stylesheet" href="css/base.css?v=1g" />
+  <link rel="stylesheet" href="css/components.css?v=1g" />
+  <link rel="stylesheet" href="css/effects.css?v=1j" />
+
+  <!-- Branded SVG Favicon from Logo Mark -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Cpath d='M17 31 L24 18 C24.8 16.8 26.2 16 27.6 16 H39 C40.4 16 41.8 16.8 42.6 18 L50 31 Z' fill='%23F5F3EE' stroke='%23D97736' stroke-width='3'/%3E%3Cpath d='M7 36 C7 33.2 9.2 31 12 31 H54 C57 31 59.5 33.4 59.8 36.4 L61 44 C61.2 45.7 59.8 47 58.1 47 H53.5 A6.5 6.5 0 0 0 40.5 47 H23.5 A6.5 6.5 0 0 0 10.5 47 H5.9 C4.2 47 2.8 45.7 3 44 Z' fill='%23101820' stroke='%23D97736' stroke-width='3'/%3E%3Ccircle cx='17' cy='47' r='6' fill='%23F5F3EE' stroke='%23101820' stroke-width='3'/%3E%3Ccircle cx='17' cy='47' r='2.5' fill='%23D97736'/%3E%3Ccircle cx='47' cy='47' r='6' fill='%23F5F3EE' stroke='%23101820' stroke-width='3'/%3E%3Ccircle cx='47' cy='47' r='2.5' fill='%23D97736'/%3E%3C/svg%3E" />
+</head>
+<body>
+  <!-- Root App Layout -->
+  <div class="app-container" id="app">
+    <!-- Persistent Sidebar (Desktop) & Mobile Top Header / Bottom Nav -->
+    <div id="sidebar-container"></div>
+
+    <!-- Main Content Area -->
+    <main class="app-main" id="main-content-wrapper">
+      <div class="page-wrapper" id="main-content" role="main" tabindex="-1">
+        <!-- Views dynamically injected by router.js -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Dynamic Comparison Floating Dock -->
+  <div id="compare-dock-container"></div>
+
+  <!-- Dynamic Modal Overlay Container (Quick View & Comparison) -->
+  <div id="modal-container"></div>
+
+  <!-- Accessible Toast Notification Region -->
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Vanilla ES Module Entry Point -->
+  <script type="module" src="js/app.js?v=1g"></script>
+</body>
+</html>
