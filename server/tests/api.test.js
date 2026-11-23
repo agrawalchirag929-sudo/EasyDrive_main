@@ -792,3 +792,79 @@ describe('404 handler', () => {
     assert.equal(body.success, false);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REGRESSION: Error handler safety (issue: ECONNRESET on dev server)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('Regression: global error handler returns JSON 500 (never crashes)', () => {
+  // Temporarily mount a route that throws synchronously inside next(err),
+  // to verify the global error handler catches it and returns a JSON response
+  // instead of crashing the process or dropping the connection.
+  const http   = require('node:http');
+  const express = require('express');
+
+  test('async route error reaches globalErrorHandler — returns 500 JSON, process survives', async () => {
+    // Spin up a minimal Express app that throws in an async route.
+    const { globalErrorHandler, notFoundHandler } = require('../middleware/errorHandler');
+    const miniApp = express();
+    miniApp.get('/boom', async (_req, _res, next) => {
+      try {
+        throw new Error('deliberate test explosion');
+      } catch (e) {
+        next(e);
+      }
+    });
+    miniApp.use(notFoundHandler);
+    miniApp.use(globalErrorHandler);
+
+    const miniServer = http.createServer(miniApp);
+    await new Promise((resolve) => miniServer.listen(0, '127.0.0.1', resolve));
+
+    const { status, body } = await request(miniServer, {
+      method: 'GET', path: '/boom',
+    });
+
+    await new Promise((resolve) => miniServer.close(resolve));
+
+    assert.equal(status, 500);
+    assert.equal(body.success, false);
+    // Must NOT echo internal error message to client.
+    assert.ok(
+      !JSON.stringify(body).includes('deliberate test explosion'),
+      'Internal error message must not be exposed in the response'
+    );
+  });
+
+  test('500 response body never contains a stack trace', async () => {
+    const { globalErrorHandler, notFoundHandler } = require('../middleware/errorHandler');
+    const miniApp = express();
+    miniApp.get('/stack', (_req, _res, next) => {
+      const err = new Error('stack leak test');
+      err.stack = 'Error: stack leak test\n    at someFile.js:1:1';
+      next(err);
+    });
+    miniApp.use(notFoundHandler);
+    miniApp.use(globalErrorHandler);
+
+    const miniServer = http.createServer(miniApp);
+    await new Promise((resolve) => miniServer.listen(0, '127.0.0.1', resolve));
+
+    const { body } = await request(miniServer, { method: 'GET', path: '/stack' });
+    await new Promise((resolve) => miniServer.close(resolve));
+
+    assert.ok(
+      !JSON.stringify(body).includes('at someFile.js'),
+      'Stack trace must never appear in the HTTP response body'
+    );
+  });
+
+  test('process-level handlers are registered (uncaughtException + unhandledRejection)', () => {
+    // Verify that the process has our safety-net handlers registered.
+    // We only check that listeners exist — we do NOT trigger them (would exit the process).
+    const uncaughtListeners = process.listeners('uncaughtException');
+    const unhandledListeners = process.listeners('unhandledRejection');
+    assert.ok(uncaughtListeners.length > 0, 'No uncaughtException handler registered on process');
+    assert.ok(unhandledListeners.length > 0, 'No unhandledRejection handler registered on process');
+  });
+});

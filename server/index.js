@@ -111,6 +111,24 @@ async function start() {
 // Export app for testing (tests import the app without calling start()).
 module.exports = app;
 
+// ── Process-level safety nets ─────────────────────────────────────────────────
+// These catch bugs that escape all try/catch and next(err) paths.
+// Log the error message (never the full stack in production) and exit so the
+// process manager (node --watch, PM2, Docker, etc.) can restart cleanly.
+
+process.on('uncaughtException', (err) => {
+  // An uncaught synchronous throw — the process is in an unknown state.
+  console.error('[FATAL] uncaughtException:', err.message);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  // A Promise rejection that was never .catch()-ed.
+  const msg = reason instanceof Error ? reason.message : String(reason);
+  console.error('[FATAL] unhandledRejection:', msg);
+  process.exit(1);
+});
+
 // Only call start() when this file is run directly, not when required by tests.
 if (require.main === module) {
   start();

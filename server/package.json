@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "dev": "node --watch index.js",
+    "dev": "node --watch --watch-path=config --watch-path=middleware --watch-path=models --watch-path=routes --watch-path=utils index.js",
     "seed": "node seed/seedCars.js",
     "test": "node --test tests/api.test.js"
   },

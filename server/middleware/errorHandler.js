@@ -7,6 +7,10 @@
  *
  * Both follow the consistent response shape:
  *   { success: false, message: "..." }
+ *
+ * Privacy rule: stack traces and raw error internals are NEVER sent to clients.
+ * Unexpected errors (500) return a generic message; err.message is only sent
+ * for operational errors that have an explicit statusCode set.
  */
 
 'use strict';
@@ -32,7 +36,8 @@ function notFoundHandler(req, res) {
  */
 // eslint-disable-next-line no-unused-vars
 function globalErrorHandler(err, req, res, next) {
-  // Log internally for debugging — never expose raw error internals to clients.
+  // Always log the real message server-side for debugging.
+  // Never log req.body — it may contain Aadhaar, DL, passwords.
   console.error('[ERROR]', err.message);
 
   // Handle Mongoose validation errors (e.g. missing required fields).
@@ -65,11 +70,15 @@ function globalErrorHandler(err, req, res, next) {
     });
   }
 
-  // Fallback: 500 Internal Server Error.
+  // Operational errors (created with an explicit statusCode < 500) may expose
+  // their message; unexpected server errors must not leak internals.
   const statusCode = err.statusCode || err.status || 500;
+  const isOperational = statusCode < 500 && Boolean(err.statusCode || err.status);
   res.status(statusCode).json({
     success: false,
-    message: err.message || 'An unexpected error occurred. Please try again later.',
+    message: isOperational
+      ? err.message
+      : 'An unexpected error occurred. Please try again later.',
   });
 }
 
