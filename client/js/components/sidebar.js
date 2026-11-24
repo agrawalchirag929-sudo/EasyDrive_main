@@ -1,15 +1,16 @@
 /**
  * EasyDrive Sidebar & Header Navigation Component (sidebar.js)
  * -----------------------------------------------------------
- * Renders:
- * 1. Persistent desktop sidebar with inlined SVG logo mark & live wordmark
- * 2. Mobile top bar (header with logo mark, wordmark, and quick theme toggle)
- * 3. Mobile bottom navigation bar
- * 4. Auth buttons (Login & Sign Up) in sidebar bottom
+ * Phase 3a: wired to auth.js.
+ * - When logged out: shows "Sign In" button (sidebar footer + mobile top bar).
+ * - When logged in:  shows user avatar/name + "Log out" option.
+ *   Works in collapsed sidebar (icon-only: avatar replaces buttons).
  */
 
 import { getState, toggleTheme } from '../state.js';
 import { showToast } from './toast.js';
+import { isLoggedIn, getUser, logout, subscribe as authSubscribe } from '../auth.js';
+import { openAuthDialog } from './authDialog.js';
 
 /**
  * Returns inlined SVG logo mark markup.
@@ -107,9 +108,6 @@ const NAV_ITEMS = [
 
 const SIDEBAR_STORAGE_KEY = 'easydrive_sidebar_collapsed';
 
-/**
- * Reads sidebar collapsed state from localStorage safely.
- */
 export function getSidebarCollapsed() {
   try {
     return localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true';
@@ -118,14 +116,125 @@ export function getSidebarCollapsed() {
   }
 }
 
-/**
- * Saves sidebar collapsed state to localStorage safely.
- */
 export function setSidebarCollapsed(collapsed) {
   try {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, collapsed ? 'true' : 'false');
   } catch (e) {
     // Ignore storage errors in private browsing
+  }
+}
+
+/** Returns the initial avatar/initial for a user's name. */
+function _initial(user) {
+  return (user?.name ?? '?')[0].toUpperCase();
+}
+
+/** Build the sidebar footer HTML depending on auth state. */
+function _buildAuthFooterHtml() {
+  if (isLoggedIn()) {
+    const user = getUser();
+    const initial = _initial(user);
+    return `
+      <div class="auth-user-row" id="sidebar-auth-row">
+        <div class="auth-avatar" aria-hidden="true">${initial}</div>
+        <div class="auth-user-info">
+          <span class="auth-user-name" title="${user.name}">${user.name}</span>
+          <button type="button" class="auth-logout-btn" id="sidebar-logout-btn">Log out</button>
+        </div>
+      </div>
+    `;
+  }
+  return `
+    <div class="sidebar-auth-row" id="sidebar-auth-row">
+      <button type="button" class="btn btn-outline auth-btn" id="sidebar-login-btn"
+              aria-label="Sign in" data-tooltip="Sign In">
+        <svg class="auth-btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+          <polyline points="10 17 15 12 10 7"></polyline>
+          <line x1="15" y1="12" x2="3" y2="12"></line>
+        </svg>
+        <span class="auth-btn-text">Sign In</span>
+      </button>
+      <button type="button" class="btn btn-brand auth-btn" id="sidebar-signup-btn"
+              aria-label="Create account" data-tooltip="Create Account">
+        <svg class="auth-btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="8.5" cy="7" r="4"></circle>
+          <line x1="20" y1="8" x2="20" y2="14"></line>
+          <line x1="23" y1="11" x2="17" y2="11"></line>
+        </svg>
+        <span class="auth-btn-text">Sign Up</span>
+      </button>
+    </div>
+  `;
+}
+
+/** Build mobile top-bar auth widget HTML. */
+function _buildMobileAuthHtml() {
+  if (isLoggedIn()) {
+    const user = getUser();
+    return `
+      <button type="button" class="mobile-user-pill" id="mobile-user-pill"
+              aria-label="Account options for ${user.name}">
+        <div class="auth-avatar" style="width:28px;height:28px;font-size:var(--text-xs);"
+             aria-hidden="true">${_initial(user)}</div>
+        <span style="max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${user.name}</span>
+      </button>
+    `;
+  }
+  return `
+    <button type="button" class="btn btn-brand btn-sm mobile-signin-btn" id="mobile-signin-btn">
+      Sign In
+    </button>
+  `;
+}
+
+/** Rewires event listeners on the sidebar footer auth section. */
+function _wireAuthFooter() {
+  document.getElementById('sidebar-login-btn')?.addEventListener('click', (e) => {
+    openAuthDialog('login', e.currentTarget);
+  });
+  document.getElementById('sidebar-signup-btn')?.addEventListener('click', (e) => {
+    openAuthDialog('register', e.currentTarget);
+  });
+  document.getElementById('sidebar-logout-btn')?.addEventListener('click', () => {
+    logout();
+    showToast('You have been signed out.', 'info', 2500);
+  });
+}
+
+/** Rewires event listeners on the mobile top-bar auth section. */
+function _wireMobileAuth() {
+  document.getElementById('mobile-signin-btn')?.addEventListener('click', (e) => {
+    openAuthDialog('login', e.currentTarget);
+  });
+  document.getElementById('mobile-user-pill')?.addEventListener('click', (e) => {
+    // For the mobile pill, show a simple "Log out?" toast + confirm
+    const confirmed = window.confirm(`Sign out of ${getUser()?.name ?? 'your account'}?`);
+    if (confirmed) {
+      logout();
+      showToast('You have been signed out.', 'info', 2500);
+    }
+  });
+}
+
+/**
+ * Updates only the auth portions of sidebar and mobile bar when auth state changes.
+ * Called by the authSubscribe listener — avoids full re-render.
+ */
+function _refreshAuthUi() {
+  const footerRow = document.getElementById('sidebar-auth-row');
+  if (footerRow) {
+    footerRow.outerHTML = _buildAuthFooterHtml();
+    _wireAuthFooter();
+  }
+
+  const mobileAuthWrap = document.getElementById('mobile-auth-wrap');
+  if (mobileAuthWrap) {
+    mobileAuthWrap.innerHTML = _buildMobileAuthHtml();
+    _wireMobileAuth();
   }
 }
 
@@ -154,9 +263,13 @@ export function renderSidebar(container) {
         </div>
         ${getWordmarkHtml()}
       </a>
-      <button type="button" class="btn btn-ghost btn-sm" id="mobile-theme-toggle" aria-label="Toggle dark/light theme" style="padding: 6px 10px;">
-        <span id="mobile-theme-icon">${currentTheme === 'dark' ? '☀️ Light' : '🌙 Dark'}</span>
-      </button>
+      <div style="display:flex;align-items:center;gap:var(--space-2);">
+        <div id="mobile-auth-wrap">${_buildMobileAuthHtml()}</div>
+        <button type="button" class="btn btn-ghost btn-sm" id="mobile-theme-toggle"
+                aria-label="Toggle dark/light theme" style="padding: 6px 10px;">
+          <span id="mobile-theme-icon">${currentTheme === 'dark' ? '☀️ Light' : '🌙 Dark'}</span>
+        </button>
+      </div>
     </header>
 
     <!-- =========================================================
@@ -181,7 +294,9 @@ export function renderSidebar(container) {
           title="${isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}"
           data-tooltip="${isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}"
         >
-          <svg class="sidebar-toggle-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg class="sidebar-toggle-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               aria-hidden="true">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button>
@@ -190,43 +305,28 @@ export function renderSidebar(container) {
       <!-- Navigation Links -->
       <nav class="sidebar-nav">
         ${NAV_ITEMS.map(item => `
-          <a href="${item.hash}" class="nav-link" data-hash="${item.hash}" aria-label="${item.label}" data-tooltip="${item.label}">
+          <a href="${item.hash}" class="nav-link" data-hash="${item.hash}"
+             aria-label="${item.label}" data-tooltip="${item.label}">
             ${item.icon}
             <span class="nav-link-text">${item.label}</span>
           </a>
         `).join('')}
       </nav>
 
-      <!-- Sidebar Footer (Theme Toggle & Login/Signup UI buttons) -->
+      <!-- Sidebar Footer (Theme Toggle & Auth) -->
       <div class="sidebar-footer">
-        <button type="button" class="theme-toggle-btn" id="sidebar-theme-toggle" aria-label="Toggle dark/light theme" data-tooltip="Toggle Theme">
-          <span class="theme-toggle-icon-wrap" id="sidebar-theme-indicator" aria-hidden="true">${currentTheme === 'dark' ? '🌙' : '☀️'}</span>
+        <button type="button" class="theme-toggle-btn" id="sidebar-theme-toggle"
+                aria-label="Toggle dark/light theme" data-tooltip="Toggle Theme">
+          <span class="theme-toggle-icon-wrap" id="sidebar-theme-indicator"
+                aria-hidden="true">${currentTheme === 'dark' ? '🌙' : '☀️'}</span>
           <span class="theme-toggle-text">
             <span id="theme-label">${currentTheme === 'dark' ? 'Dark Mode' : 'Light Mode'}</span>
             <span style="font-size: 10px; color: var(--muted); text-transform: uppercase;">Switch</span>
           </span>
         </button>
 
-        <!-- Login and Sign Up UI Buttons -->
-        <div class="sidebar-auth-row">
-          <button type="button" class="btn btn-outline auth-btn" id="sidebar-login-btn" aria-label="Login" data-tooltip="Login">
-            <svg class="auth-btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-              <polyline points="10 17 15 12 10 7"></polyline>
-              <line x1="15" y1="12" x2="3" y2="12"></line>
-            </svg>
-            <span class="auth-btn-text">Login</span>
-          </button>
-          <button type="button" class="btn btn-brand auth-btn" id="sidebar-signup-btn" aria-label="Sign Up" data-tooltip="Sign Up">
-            <svg class="auth-btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="8.5" cy="7" r="4"></circle>
-              <line x1="20" y1="8" x2="20" y2="14"></line>
-              <line x1="23" y1="11" x2="17" y2="11"></line>
-            </svg>
-            <span class="auth-btn-text">Sign Up</span>
-          </button>
-        </div>
+        <!-- Auth footer section (swapped by _refreshAuthUi on auth change) -->
+        ${_buildAuthFooterHtml()}
       </div>
     </aside>
 
@@ -247,13 +347,14 @@ export function renderSidebar(container) {
     </nav>
   `;
 
-  // Attach sidebar collapse toggle handler
+  // ── Event listeners ──────────────────────────────────────────────────────────
+
+  // Sidebar collapse
   const toggleBtn = document.getElementById('sidebar-toggle-btn');
   toggleBtn?.addEventListener('click', () => {
     const isNowCollapsed = !document.body.classList.contains('sidebar-collapsed');
     document.body.classList.toggle('sidebar-collapsed', isNowCollapsed);
     setSidebarCollapsed(isNowCollapsed);
-
     const label = isNowCollapsed ? 'Expand sidebar' : 'Collapse sidebar';
     toggleBtn.setAttribute('aria-expanded', String(!isNowCollapsed));
     toggleBtn.setAttribute('aria-label', label);
@@ -261,48 +362,36 @@ export function renderSidebar(container) {
     toggleBtn.setAttribute('data-tooltip', label);
   });
 
-  // Attach theme toggle handlers
+  // Theme toggles
   const handleToggle = () => {
     const newTheme = toggleTheme();
     updateThemeUI(newTheme);
     showToast(`Switched to ${newTheme} mode`, 'info', 1800);
   };
-
   document.getElementById('sidebar-theme-toggle')?.addEventListener('click', handleToggle);
   document.getElementById('mobile-theme-toggle')?.addEventListener('click', handleToggle);
 
-  // Auth button click feedback (UI only for now as requested)
-  document.getElementById('sidebar-login-btn')?.addEventListener('click', () => {
-    showToast('JWT Login flow will connect in Phase 2 backend!', 'info', 2500);
-  });
-  document.getElementById('sidebar-signup-btn')?.addEventListener('click', () => {
-    showToast('Registration flow will connect in Phase 2 backend!', 'info', 2500);
-  });
+  // Auth buttons (initial wire)
+  _wireAuthFooter();
+  _wireMobileAuth();
+
+  // Subscribe to auth state changes to refresh the auth UI without re-rendering the whole sidebar
+  authSubscribe(_refreshAuthUi);
 }
 
 export function updateThemeUI(theme) {
   const label = document.getElementById('theme-label');
   const mobIcon = document.getElementById('mobile-theme-icon');
   const indicator = document.getElementById('sidebar-theme-indicator');
-  if (label) {
-    label.textContent = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
-  }
-  if (mobIcon) {
-    mobIcon.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
-  }
-  if (indicator) {
-    indicator.textContent = theme === 'dark' ? '🌙' : '☀️';
-  }
+  if (label)     label.textContent   = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
+  if (mobIcon)   mobIcon.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
+  if (indicator) indicator.textContent = theme === 'dark' ? '🌙' : '☀️';
 }
 
 export function updateActiveNav(currentHash) {
   const hash = currentHash || '#home';
   document.querySelectorAll('.nav-link, .bottom-nav-link').forEach(link => {
     const linkHash = link.getAttribute('data-hash');
-    if (linkHash === hash) {
-      link.classList.add('active');
-    } else {
-      link.classList.remove('active');
-    }
+    link.classList.toggle('active', linkHash === hash);
   });
 }

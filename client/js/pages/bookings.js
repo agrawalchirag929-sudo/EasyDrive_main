@@ -1,12 +1,82 @@
 /**
- * EasyDrive Bookings Page Placeholder (pages/bookings.js)
- * -----------------------------------------------------------
- * Clean empty state for Phase 1. In Phase 4, connects to live booking records.
+ * EasyDrive Bookings Page (pages/bookings.js)
+ * Phase 3a: Shows an auth gate when logged out; keeps the Phase 1 placeholder
+ * when logged in (Phase 3d will replace it with live booking cards).
  */
 
 import { getLogoMarkSvg, getWordmarkHtml } from '../components/sidebar.js';
+import { isLoggedIn, subscribe as authSubscribe } from '../auth.js';
+import { openAuthDialog } from '../components/authDialog.js';
 
 export function renderBookingsPage(container) {
+  _render(container);
+
+  // Re-render when auth state changes while this page is mounted
+  const unsub = authSubscribe(() => {
+    if (document.body.contains(container)) {
+      _render(container);
+    } else {
+      unsub();
+    }
+  });
+}
+
+function _render(container) {
+  if (isLoggedIn()) {
+    _renderPlaceholder(container);
+  } else {
+    _renderAuthGate(container);
+  }
+}
+
+function _renderAuthGate(container) {
+  container.innerHTML = `
+    <div class="page-fade-in">
+      <div style="margin-bottom: var(--space-8);">
+        <span style="font-size: var(--text-xs); color: var(--brand); font-weight: 700; text-transform: uppercase;">Trips Manager</span>
+        <h1 class="section-title">My Bookings</h1>
+        <p style="color: var(--muted); font-size: var(--text-sm);">
+          Track upcoming departures, download trip invoices, and manage vehicle returns.
+        </p>
+      </div>
+
+      <div class="empty-state-card reveal-on-scroll">
+        <div class="bookings-auth-gate">
+          <svg class="gate-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.5" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <h2>Sign In to See Your Bookings</h2>
+          <p>
+            Your trip history and upcoming reservations are waiting. Sign in or create a free account
+            to access your personalised bookings dashboard.
+          </p>
+          <div class="gate-actions">
+            <button type="button" class="btn btn-brand" id="bookings-signin-btn">
+              Sign In
+              <span class="btn-arrow">&rarr;</span>
+            </button>
+            <button type="button" class="btn btn-outline" id="bookings-signup-btn">
+              Create Account
+            </button>
+          </div>
+        </div>
+      </div>
+
+      ${_footerHtml()}
+    </div>
+  `;
+
+  document.getElementById('bookings-signin-btn')?.addEventListener('click', (e) => {
+    openAuthDialog('login', e.currentTarget);
+  });
+  document.getElementById('bookings-signup-btn')?.addEventListener('click', (e) => {
+    openAuthDialog('register', e.currentTarget);
+  });
+}
+
+function _renderPlaceholder(container) {
   container.innerHTML = `
     <div class="page-fade-in">
       <div style="margin-bottom: var(--space-8);">
@@ -40,21 +110,24 @@ export function renderBookingsPage(container) {
         </div>
       </div>
 
-      <!-- Footer -->
-      <footer class="app-footer" style="margin-top: var(--space-12);">
-        <div class="footer-brand-wrap">
-          <div class="brand-icon-wrap" style="width: 24px; height: 24px;">
-            ${getLogoMarkSvg()}
-          </div>
-          ${getWordmarkHtml()}
-        </div>
-        <div class="footer-demo-notice">
-          Demo project built for learning. Portfolio showcase.
-        </div>
-        <div>
-          8 Metro Hubs • 12 Vehicles
-        </div>
-      </footer>
+      ${_footerHtml()}
     </div>
+  `;
+}
+
+function _footerHtml() {
+  return `
+    <footer class="app-footer" style="margin-top: var(--space-12);">
+      <div class="footer-brand-wrap">
+        <div class="brand-icon-wrap" style="width: 24px; height: 24px;">
+          ${getLogoMarkSvg()}
+        </div>
+        ${getWordmarkHtml()}
+      </div>
+      <div class="footer-demo-notice">
+        Demo project built for learning. Portfolio showcase.
+      </div>
+      <div>8 Metro Hubs &bull; 12 Vehicles</div>
+    </footer>
   `;
 }

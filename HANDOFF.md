@@ -4,7 +4,7 @@
 > **Type:** Full-Stack Self-Drive Car Rental Platform (Indian Mobility Market)  
 > **Target Audience:** Placement interview showcase / Student CV portfolio for Chirag (India, IST)  
 > **Architecture:** Clean Vanilla JS Single-Page Application (SPA) frontend + Node.js/Express/MongoDB REST API backend  
-> **Status:** Phase 1 Frontend Complete & Audited; Phase 2 Backend Complete (65/65 tests pass); Ready for Phase 3  
+> **Status:** Phase 1 Frontend Complete & Audited; Phase 2 Backend Complete (65/65 tests pass); **Phase 3a Auth Integration Complete**; Ready for Phase 3b  
 
 ---
 
@@ -38,9 +38,10 @@ EasyDrive is a production-grade, full-stack car rental booking web application d
 | **Interaction Effects** | **Done** | 6 performant interactions in `effects.css` and `effects.js`: card hover zoom, page fade & slide, image fade-in with skeleton shimmer, button press feedback, sticky filter bar (>=900px), and card cursor spotlight. Full `prefers-reduced-motion` support. |
 | **Safe Storage & Error Fallback** | **Done** | `state.js` wraps all `localStorage` reads/writes in `try/catch` with an in-memory fallback store (`memoryStorage`), preventing crashes in private browsing. |
 | **Repository `.gitignore`** | **Done** | Contains `node_modules/`, `.env`, `.env.*`, `!.env.example`, `.DS_Store`, `*.log`, `Thumbs.db`, `.vscode/`. Security tracking audit verified clean. |
-| **Auth UI (Login / Sign Up)** | **Partial** | Buttons exist in sidebar footer and trigger informative toast notifications. Backend connection pending Phase 2/3. |
-| **Booking Submission** | **Partial** | "Book" buttons on cards and modals display a confirmation toast informing the user that live booking connects in Phase 3. Full modal form pending Phase 3. |
-| **My Bookings Screen** | **Partial** | `#bookings` route renders a polished empty state ("No Active Bookings Yet"), ready to be connected to the API in Phase 4. |
+| **Auth UI (Login / Sign Up)** | **Done (Phase 3a)** | Sign-in / create-account dialog (`authDialog.js`, `auth.css`): tabs, focus trap, Esc, inline field errors, server fieldErrors mapped to fields, loading state, toast on success. Sidebar shows avatar+name+logout when logged in. |
+| **Auth Session** | **Done (Phase 3a)** | `api.js` fetch helper + `auth.js` session manager. `restoreSession()` called at boot before sidebar renders. Safe `localStorage` with in-memory Map fallback. 401 auto-clears session and re-opens sign-in dialog. |
+| **Booking Submission** | **Partial** | "Book" buttons now open the auth dialog when logged out; show a Phase 1 toast when logged in. Full booking form wired to API is **Phase 3b**. |
+| **My Bookings Screen** | **Partial (Phase 3a gate)** | Shows a friendly "Sign in to see your bookings" gate when logged out; Phase 1 empty-state placeholder when logged in. Full trip history is **Phase 3c**. |
 | **Backend REST API (`server/`)** | **Done (Phase 2)** | Express 4.21, Mongoose 8.9, JWT auth, Zod validation, Helmet, CORS, rate-limit. 9 endpoints, 65 tests (18 suites) all passing. Full booking validation: city/hub, car-city, past-date, 30-day max, Aadhaar 2-9, DL format, whole-rupee pricing, `CAR_NOT_AVAILABLE` 409. |
 | **Razorpay Payment Gateway** | **Not Started** | Scheduled for **Phase 6** in test mode. |
 | **Admin Dashboard** | **Not Started** | Scheduled for **Phase 5** for vehicle CRUD and booking management. |
@@ -57,6 +58,7 @@ MAIN2.0/
 ├── HANDOFF.md                     # This file — standalone context for AI assistants and developers
 ├── client-server.js               # Zero-dependency local Node static server for client/ preview
 ├── docs/
+│   ├── API.md                     # Full backend API reference (Phase 2)
 │   └── PHASE2_PROMPT.md           # Exact Phase 2 backend specification prompt to follow
 ├── client/
 │   ├── index.html                 # Root HTML document, meta tags, Google Fonts, and layout anchors
@@ -64,14 +66,18 @@ MAIN2.0/
 │   │   ├── tokens.css             # Design tokens: palettes, typography, spacing, radii, glows, shadows
 │   │   ├── base.css               # Reset, CSS variables application, typography base, scrollbars
 │   │   ├── components.css         # Sidebar, cards, buttons, modals, compare dock, tables, forms, footer
-│   │   └── effects.css            # Interaction effects: hover zoom, page fade, spotlight, sticky bar
+│   │   ├── effects.css            # Interaction effects: hover zoom, page fade, spotlight, sticky bar
+│   │   └── auth.css               # Phase 3a — dialog, tabs, inputs, auth header states, bookings gate
 │   ├── js/
-│   │   ├── app.js                 # App orchestrator: fetches cars.json, boots router, global event delegation
+│   │   ├── app.js                 # App orchestrator: restoreSession → sidebar → router → global events
 │   │   ├── router.js              # Hash router: route table, dynamic view mounting, scroll restoration
 │   │   ├── state.js               # Reactive pub/sub store, safe storage with in-memory fallback
 │   │   ├── effects.js             # Runtime scripts for spotlight, sticky observer, image skeletons
+│   │   ├── api.js                 # Phase 3a — shared fetch helper, ApiError, Bearer token, 401 handler
+│   │   ├── auth.js                # Phase 3a — login/register/logout/restoreSession/subscribe
 │   │   ├── components/
-│   │   │   ├── sidebar.js         # Desktop sidebar, mobile top header, mobile bottom nav, wordmark, logo
+│   │   │   ├── sidebar.js         # Desktop sidebar + mobile nav — Phase 3a: auth header state
+│   │   │   ├── authDialog.js      # Phase 3a — accessible sign-in/create-account dialog, focus trap
 │   │   │   ├── carCard.js         # Car card rendering, Quick View modal, focus trap, specs summary
 │   │   │   ├── compareModal.js    # Floating compare dock, comparison table modal, focus trap
 │   │   │   ├── skeleton.js        # Shimmer skeleton markup generator for async card loading states
@@ -79,7 +85,7 @@ MAIN2.0/
 │   │   └── pages/
 │   │       ├── home.js            # Centered hero, quick search form, metrics, featured cars, city tiles, steps
 │   │       ├── catalogue.js       # Fleet grid, category tabs, multi-city/text filtering, unclipped selects
-│   │       ├── bookings.js        # My Bookings page (current clean empty state; live list in Phase 4)
+│   │       ├── bookings.js        # Phase 3a — auth gate when logged out; Phase 1 placeholder when logged in
 │   │       └── support.js         # 3-card contact grid, animated FAQ accordion, helpline simulation
 │   └── assets/
 │       ├── logo-mark.svg          # Primary scalable vector logo mark (inlined dynamically in JS)
@@ -173,8 +179,7 @@ MAIN2.0/
    - *Current:* `[data-action="book"]` event listener displays a toast notification.
    - *Phase 3 Replacement:* Opens an interactive booking modal prefilled with car details, prompts for rental dates, pickup hub, driver details (Aadhaar/DL), calculates real-time duration and price, and sends `POST /api/bookings`.
 3. **Authentication Buttons (`client/js/components/sidebar.js`):**
-   - *Current:* `#sidebar-login-btn` and `#sidebar-signup-btn` display placeholder toasts.
-   - *Phase 3 Replacement:* Opens Login / Register modals making `POST /api/auth/login` and `POST /api/auth/register` requests, saving JWT token and user details to state.
+   - *Current (Phase 3a — Done):* Sidebar shows "Sign In" when logged out and avatar+name+"Log out" when logged in. `authDialog.js` handles full login/register flow via `POST /api/auth/login` and `POST /api/auth/register`. JWT stored in `localStorage` via `auth.js`.
 4. **My Bookings Dashboard (`client/js/pages/bookings.js`):**
    - *Current:* Renders a static empty state card.
    - *Phase 4 Replacement:* Issues authenticated `fetch('/api/bookings')` with Bearer token, rendering real upcoming/past booking cards with cancellation triggers.
@@ -376,12 +381,22 @@ Every vehicle record contains the following properties:
 - Fleet seed script (`server/seed/seedCars.js`) reading `client/assets/cars.json` to populate MongoDB with all 12 cars.
 - Comprehensive automated test suite (`server/tests/api.test.js`) — 65 tests, 18 suites — using `mongodb-memory-server` (never real DB). Covers all booking validation rules, privacy, pricing, unit logic.
 
-### Phase 3: Frontend-API Integration (Next Up)
-- Update `client/js/app.js` to fetch live vehicles from `GET /api/cars`.
-- Build interactive Booking Modal Form capturing dates, pickup hub, driver details, and Aadhaar/DL with live client-side validation.
-- Implement live client-side price breakdown preview (Days $\times$ Rate + Taxes + Refundable Deposit).
-- Build Login / Register dialog modals and attach to sidebar auth buttons.
-- Persist JWT in memory/state and attach `Authorization: Bearer <token>` to booking requests.
+### Phase 3a: Frontend Auth Integration (Completed ✅)
+- `client/js/api.js` — shared fetch helper (base URL `http://localhost:5000`, Bearer token, `{success,data}` envelope unwrap, `ApiError` with `{status, message, fieldErrors}`, network error "Cannot reach the server. Is the API running?", 401 auto-handler).
+- `client/js/auth.js` — `login`, `register`, `logout`, `restoreSession` (validates stored token with `GET /api/auth/me` on boot), `subscribe`/`onChange`. Safe `localStorage` with in-memory Map fallback. Never logs token or passwords.
+- `client/js/components/authDialog.js` — single-instance dialog (`role=dialog`, `aria-modal`, focus trap, Esc, focus return). Tabs: "Sign In" / "Create Account". Fields: name (register only), email, password + show/hide eye toggle. Client validation mirrors server rules. Maps server `fieldErrors` to form fields. Loading state on submit. Toast "Welcome, \<name\>! 👋" on success.
+- `client/css/auth.css` — dialog, tabs, inputs, inline field errors, header auth states (mobile + sidebar), Bookings gate, `prefers-reduced-motion` support.
+- `client/index.html` — added `auth.css?v=3a` link.
+- `client/js/app.js` — `await restoreSession()` before `renderSidebar`; Book button opens auth dialog when logged out.
+- `client/js/components/sidebar.js` — `_refreshAuthUi()` surgically swaps `#sidebar-auth-row` and `#mobile-auth-wrap` on auth change without full re-render.
+- `client/js/pages/bookings.js` — auth gate when logged out; Phase 1 placeholder when logged in.
+
+### Phase 3b: Booking Form (Next Up)
+- Wire the existing booking form to `POST /api/bookings`.
+- Live date picker with server-blocked dates from `GET /api/cars/:slug/booked-dates`.
+- Hub selector driven by city selection (hubs defined in server `config/hubs.js`).
+- Live client-side price preview (days × rate + 18% tax + deposit).
+- Aadhaar (12-digit, first digit 2–9) and DL (format `AA00AA0000000`) inputs with client-side validation.
 
 ### Phase 4: My Bookings & Cancellation Management
 - Update `#bookings` route to display user's live bookings fetched from `GET /api/bookings`.
@@ -463,6 +478,28 @@ npm test
 - Uses `mongodb-memory-server` (devDependency) — **never touches your real database**.
 - MongoDB binary is downloaded once on first run (~600 MB) and cached.
 - **Result as of Phase 2 completion:** 65 tests pass, 0 fail (18 suites).
+
+### Testing Phase 3a Auth (Browser)
+
+Start both servers, then open **http://localhost:3000** and follow these steps:
+
+1. Click **"Sign In"** in the sidebar footer → auth dialog opens on the Sign In tab.
+2. Submit empty → inline validation errors appear on each field.
+3. Enter a short password (< 8 chars) → "Password must be at least 8 characters".
+4. Enter a password with no number → "Password must contain at least one number".
+5. Switch to **"Create Account"** tab, fill name / email / valid password → submit.
+   - Dialog closes, toast **"Welcome, \<name\>! 👋"** appears, header shows avatar + name.
+6. **Refresh the page** → still logged in (`restoreSession` validates token with the API).
+7. Click **"Log out"** → header reverts to "Sign In".
+8. Click "Sign In", enter correct email + password → success.
+9. Enter wrong password → "Invalid email or password." shown as an inline error.
+10. Navigate to **#bookings** while **logged out** → lock icon + "Sign In to See Your Bookings".
+11. Navigate to **#bookings** while **logged in** → Phase 1 placeholder.
+12. Click any **"Book"** button on a car card while logged out → auth dialog opens.
+13. Test at **390 px** viewport width → dialog fills screen, all tabs and fields work.
+
+> **If you see a CORS error:** confirm `CLIENT_ORIGINS=http://localhost:3000` is set in
+> `server/.env`. The default `.env.example` already includes it. Do not edit server code.
 
 ---
 

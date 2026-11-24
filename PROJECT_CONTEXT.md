@@ -217,7 +217,9 @@ MAIN2.0/
 | **Phase 1l** | Catalogue Filter & Visibility Fix: Diagnosed and resolved blank cards issue during search/category/city filtering caused by newly rendered `.reveal-on-scroll` elements lacking observer registration and staying at `opacity: 0`. Added automatic `.revealed` application on filtered renders, re-initialized `initScrollReveal` and `initImageHandlers`, implemented CSS/JS 600ms reveal & image failsafes, case-insensitive trimmed multi-word search across brand and model, singular/plural grammar ("Showing 1 vehicle" / "Showing 12 vehicles"), and empty state with "Clear filters" button restoring all 12 cars. | **Completed** |
 | **Phase 1n** | Audit Fixes: Quick View Escape handler & listener cleanup; focus trap & restoration for both Quick View and Compare popups (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`); `localStorage` try/catch wrapping with in-memory fallback in `state.js`; `.gitignore` with secrets & temp rules and `git ls-files` security tracking audit. | **Completed** |
 | **Phase 2** | Backend: Express REST API, Mongoose models (User, Car, Booking), JWT auth, strict Aadhaar/DL privacy, overlap prevention, seed script, API docs, automated test suite. | **Completed** |
-| **Phase 3** | Frontend-API Integration: Catalogue filters, car detail view, live pricing calculation, booking form. | Pending |
+| **Phase 3a** | Frontend Auth Integration: `api.js` fetch helper, `auth.js` session management, auth dialog UI (sign-in / create-account, focus trap), sidebar auth state, Bookings auth gate. | **Completed** |
+| **Phase 3b** | Booking form wired to `POST /api/bookings`: live date picker, hub selector, Aadhaar/DL inputs, server pricing displayed. | Pending |
+| **Phase 3c** | My Bookings page: `GET /api/bookings/mine` history, trip cards with status badges. | Pending |
 | **Phase 4** | My Bookings, Cancellation flow, QR code confirmation, downloadable PDF/HTML invoice, skeleton loaders, toast notifications. | Pending |
 | **Phase 5** | Admin Dashboard: Car CRUD, booking management, platform analytics, reviews system, dark/light theme polish. | Pending |
 | **Phase 6** | Razorpay Payment Integration (Test Mode). | Pending |
@@ -226,8 +228,18 @@ MAIN2.0/
 ---
 
 ## 6. Current Phase Status
-- **Current Phase:** Phase 3 (Ready to Start).
-- **Status:** Phase 2 backend complete with full booking validation, query aliases, whole-rupee pricing, and conflict codes. All **65 tests pass** (0 failures, 18 suites). `server/` fully implemented per `docs/PHASE2_PROMPT.md`.
+- **Current Phase:** Phase 3b (Ready to Start).
+- **Status:** Phase 3a auth integration complete. Phase 2 backend complete. All **65 tests pass** (0 failures, 18 suites).
+
+### Phase 3a Deliverables (Completed):
+- `client/js/api.js` — shared fetch helper (base URL `http://localhost:5000`, Bearer token, `{success,data}` envelope unwrap, `ApiError` with `fieldErrors`, 401 handler slot).
+- `client/js/auth.js` — `login`, `register`, `logout`, `restoreSession` (validates stored token with `/api/auth/me` on boot), `subscribe`/`onChange`. Safe `localStorage` with in-memory Map fallback. Never logs token or passwords.
+- `client/js/components/authDialog.js` — single-instance accessible dialog (tabs: Sign In / Create Account), `role=dialog`, `aria-modal`, focus trap, Esc close, focus return to trigger. Fields: name (register only), email, password + show/hide. Client-side validation mirrors server rules (email format, ≥8 chars, letter+number). Maps server `fieldErrors` to form fields. Loading state on submit. Toast "Welcome, \<name\>! 👋" on success.
+- `client/css/auth.css` — dialog, tabs, inputs, inline field errors, header auth states, mobile auth pill, Bookings gate, `prefers-reduced-motion` support.
+- `client/index.html` — added `<link rel="stylesheet" href="css/auth.css?v=3a" />`.
+- `client/js/app.js` — `import { restoreSession }` + `await restoreSession()` before `renderSidebar`; Book button opens auth dialog when logged out.
+- `client/js/components/sidebar.js` — logged-out shows "Sign In"; logged-in shows avatar + name + "Log out". Works in collapsed sidebar. Subscribes to auth changes without full re-render.
+- `client/js/pages/bookings.js` — auth gate (lock icon, "Sign In to See Your Bookings") when logged out; Phase 1 placeholder when logged in.
 
 ### Phase 2 Deliverables (Completed):
 - `server/` initialized with Express 4.21, Mongoose 8.9, JWT, Zod, Helmet, Morgan, CORS, express-rate-limit.
@@ -246,11 +258,15 @@ MAIN2.0/
 ---
 
 ## 7. What Is Next
-- **Phase 3: Frontend-API Integration**:
-  - Connect `client/js/app.js` to fetch live fleet from `GET /api/cars`.
-  - Build interactive Booking Modal Form with live price breakdown, date range pickers, and Aadhaar/DL inputs.
-  - Implement Login / Sign Up modals connecting to `POST /api/auth/login` and `POST /api/auth/register`.
-  - Persist JWT in client state and attach `Authorization: Bearer <token>` to requests.
+- **Phase 3b: Booking Form**:
+  - Wire the existing booking form in `client/` to `POST /api/bookings`.
+  - Live date picker with server-blocked dates from `GET /api/cars/:slug/booked-dates`.
+  - Hub selector driven by `config/hubs.js` for the chosen city.
+  - Live client-side price preview (days × rate + tax + deposit).
+  - Aadhaar (12-digit, first digit 2–9) and DL (format `AA00AA0000000`) inputs with client-side validation.
+- **Phase 3c: My Bookings**:
+  - Replace the Bookings page placeholder with live data from `GET /api/bookings/mine`.
+  - Trip cards with booking reference, dates, hub, status badge, and cost summary.
 
 
 ---

@@ -16,6 +16,7 @@ import { updateCompareDock } from './components/compareModal.js';
 import { openQuickViewModal } from './components/carCard.js';
 import { showToast } from './components/toast.js';
 import { initInteractionEffects } from './effects.js';
+import { restoreSession } from './auth.js';
 
 /**
  * Initializes the EasyDrive application.
@@ -25,13 +26,18 @@ async function initApp() {
   const { theme } = getState();
   setTheme(theme);
 
-  // 2. Mount persistent sidebar and mobile navigation
+  // 2. Restore auth session — validate stored token with the API before
+  //    rendering the sidebar so isLoggedIn() returns the correct value
+  //    immediately (avoids a logged-in flash of the "Sign In" button).
+  await restoreSession();
+
+  // 3. Mount persistent sidebar and mobile navigation
   const sidebarContainer = document.getElementById('sidebar-container');
   if (sidebarContainer) {
     renderSidebar(sidebarContainer);
   }
 
-  // 3. Load fleet data (12 Indian cars)
+  // 4. Load fleet data (12 Indian cars)
   try {
     const response = await fetch('./assets/cars.json');
     if (!response.ok) {
@@ -44,26 +50,26 @@ async function initApp() {
     showToast('Failed to load vehicle catalogue. Please check file server.', 'error');
   }
 
-  // 4. Initialize client-side router
+  // 5. Initialize client-side router
   const mainContent = document.getElementById('main-content');
   if (mainContent) {
     initRouter(mainContent);
   }
 
-  // 5. Initial compare dock check
+  // 6. Initial compare dock check
   updateCompareDock();
 
-  // 6. Subscribe to state changes for UI synchronization
+  // 7. Subscribe to state changes for UI synchronization
   subscribe((state, changeType) => {
     if (changeType === 'COMPARE_UPDATED' || changeType === 'ROUTE_CHANGED') {
       updateCompareDock();
     }
   });
 
-  // 7. Register Global Event Delegation
+  // 8. Register Global Event Delegation
   registerGlobalEvents();
 
-  // 8. Initialize Phase 1j Interaction Effects
+  // 9. Initialize Phase 1j Interaction Effects
   initInteractionEffects();
 }
 
@@ -130,16 +136,22 @@ function registerGlobalEvents() {
       return;
     }
 
-    // 4. "Book" Button
+    // 4. "Book" Button — requires sign-in (Phase 3a gate)
     const bookBtn = e.target.closest('[data-action="book"]');
     if (bookBtn) {
+      const { isLoggedIn } = await import('./auth.js');
+      if (!isLoggedIn()) {
+        const { openAuthDialog } = await import('./components/authDialog.js');
+        openAuthDialog('login', bookBtn);
+        return;
+      }
       const carId = bookBtn.getAttribute('data-car-id');
       const { cars } = getState();
       const car = cars.find(c => c.id === carId);
       const carName = car ? `${car.brand} ${car.name}` : 'Selected vehicle';
 
       showToast(
-        `Selected ${carName}. Full booking flow with live price calculation connects in Phase 3!`,
+        `Selected ${carName}. Full booking flow connects in Phase 3b!`,
         'success',
         3500
       );
