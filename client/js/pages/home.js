@@ -36,6 +36,10 @@ function getDateString(offsetDays = 0) {
 
 export function renderHomePage(container) {
   const { cars, favorites, compareList } = getState();
+  // cars is [] while loading OR if the API failed.
+  // We distinguish "loading" (never tried yet — app.js hasn't resolved) from
+  // "error" (tried and setCars([]) was called) via a data attribute set below.
+  const isLoading = cars.length === 0;
   const featuredCars = cars.filter(c => c.isFeatured).slice(0, 6);
 
   const tomorrowStr = getDateString(1);
@@ -141,13 +145,32 @@ export function renderHomePage(container) {
           </a>
         </div>
 
-        <div class="car-grid" id="home-featured-grid">
-          ${cars.length === 0
+        <div class="car-grid" id="home-featured-grid" data-loading="${isLoading}">
+          ${isLoading
             ? renderCarSkeleton(6)
-            : featuredCars.map(car => renderCarCard(car, {
-                isFavorite: favorites.has(car.id),
-                isCompared: compareList.includes(car.id)
-              })).join('')}
+            : (featuredCars.length > 0
+                ? featuredCars.map(car => renderCarCard(car, {
+                    isFavorite: favorites.has(car.id),
+                    isCompared: compareList.includes(car.id)
+                  })).join('')
+                : `
+                  <div style="grid-column:1/-1;text-align:center;padding:var(--space-10) var(--space-4);" role="alert">
+                    <div style="margin:0 auto var(--space-3);width:48px;height:48px;color:var(--error,#EF4444);">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                      </svg>
+                    </div>
+                    <h3 style="font-size:var(--text-xl);margin-bottom:var(--space-2);">We couldn't load the cars</h3>
+                    <p style="color:var(--muted);font-size:var(--text-sm);max-width:440px;margin:0 auto var(--space-4);">
+                      Could not reach the API. Make sure the server is running, then retry.
+                    </p>
+                    <button type="button" class="btn btn-brand btn-sm" id="home-retry-btn">Retry</button>
+                  </div>
+                `
+              )
+          }
         </div>
       </section>
 
@@ -260,6 +283,26 @@ export function renderHomePage(container) {
 
   // Trigger one-time number count-up animation
   initStatCountUp();
+
+  // Retry button — only present when API failed and featured grid is empty
+  const retryBtn = container.querySelector('#home-retry-btn');
+  if (retryBtn) {
+    retryBtn.addEventListener('click', async () => {
+      retryBtn.disabled = true;
+      retryBtn.textContent = 'Retrying…';
+      try {
+        const { fetchCars } = await import('../api.js');
+        const cars = await fetchCars();
+        const { setCars } = await import('../state.js');
+        setCars(cars);
+        // Re-render the whole home page so featured section updates
+        renderHomePage(container);
+      } catch {
+        retryBtn.disabled = false;
+        retryBtn.textContent = 'Retry';
+      }
+    });
+  }
 }
 
 /**

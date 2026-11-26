@@ -218,8 +218,9 @@ MAIN2.0/
 | **Phase 1n** | Audit Fixes: Quick View Escape handler & listener cleanup; focus trap & restoration for both Quick View and Compare popups (`role="dialog"`, `aria-modal="true"`, `aria-labelledby`); `localStorage` try/catch wrapping with in-memory fallback in `state.js`; `.gitignore` with secrets & temp rules and `git ls-files` security tracking audit. | **Completed** |
 | **Phase 2** | Backend: Express REST API, Mongoose models (User, Car, Booking), JWT auth, strict Aadhaar/DL privacy, overlap prevention, seed script, API docs, automated test suite. | **Completed** |
 | **Phase 3a** | Frontend Auth Integration: `api.js` fetch helper, `auth.js` session management, auth dialog UI (sign-in / create-account, focus trap), sidebar auth state, Bookings auth gate. | **Completed** |
-| **Phase 3b** | Booking form wired to `POST /api/bookings`: live date picker, hub selector, Aadhaar/DL inputs, server pricing displayed. | Pending |
-| **Phase 3c** | My Bookings page: `GET /api/bookings/mine` history, trip cards with status badges. | Pending |
+| **Phase 3b** | Catalogue & Home from API: `fetchCars` / `fetchCar` in `api.js`; app.js loads fleet from `GET /api/cars`; catalogue filters (city, category, search, sort) call API; AbortController; skeleton/dim/error states; Retry button. | **Completed** |
+| **Phase 3c** | Booking form modal wired to `POST /api/bookings`: city+hub selector, date picker, blocked dates from API, Aadhaar/DL client validation, live price preview, success screen. | **Completed** |
+| **Phase 3d** | My Bookings page: `GET /api/bookings/mine` history, trip cards with status badges. | Pending |
 | **Phase 4** | My Bookings, Cancellation flow, QR code confirmation, downloadable PDF/HTML invoice, skeleton loaders, toast notifications. | Pending |
 | **Phase 5** | Admin Dashboard: Car CRUD, booking management, platform analytics, reviews system, dark/light theme polish. | Pending |
 | **Phase 6** | Razorpay Payment Integration (Test Mode). | Pending |
@@ -228,8 +229,22 @@ MAIN2.0/
 ---
 
 ## 6. Current Phase Status
-- **Current Phase:** Phase 3b (Ready to Start).
-- **Status:** Phase 3a auth integration complete. Phase 2 backend complete. All **65 tests pass** (0 failures, 18 suites).
+- **Current Phase:** Phase 3d (Ready to Start).
+- **Status:** Phase 3c booking form modal complete. Phase 3b catalogue/home from API complete. Phase 3a auth integration complete. Phase 2 backend complete. All **65 tests pass** (0 failures, 18 suites).
+
+### Phase 3c Deliverables (Completed):
+- `client/js/api.js` — added `fetchBookedDates(slug)` and `createBooking(payload)`. Aadhaar/DL never logged.
+- `client/js/components/bookingModal.js` — accessible booking modal: city select (car-filtered), hub select (CITY_HUBS mirror), date picker with min/max/30-day cap, blocked-date conflict check, Aadhaar (12-digit, first digit 2–9) + DL (4–20 alphanumeric) inputs, live price preview (days × rate + 18% GST estimate), `POST /api/bookings`, success confirmation screen with booking reference.
+- `client/js/app.js` — Book button opens `openBookingModal(car, bookBtn)` when signed in.
+- `client/css/booking.css` — new file: backdrop, panel, sections, inputs, price preview, success screen, responsive to 390px, `prefers-reduced-motion`.
+- `client/index.html` — added `<link rel="stylesheet" href="css/booking.css?v=3c" />`.
+
+### Phase 3b Deliverables (Completed):
+- `client/js/api.js` — added `fetchCars(filters, {signal})`, `fetchCar(slug)`, and `adaptCar()` adapter (maps `slug→id`, preserves all existing card fields).
+- `client/js/app.js` — replaced `fetch('./assets/cars.json')` with `fetchCars()`. On error logs a short message; `state.cars` stays `[]` and each page shows its own error UI.
+- `client/js/pages/catalogue.js` — fully rewritten: filters (city, category, q, sort) all call `GET /api/cars` with matching query params; `AbortController` cancels stale requests; first load shows skeleton loaders; filter changes dim existing cards (opacity 0.4) until new results arrive; API error shows friendly error card + Retry button; empty-filter result shows "Clear filters"; count text, sticky filter bar, and all Phase 1 effects preserved.
+- `client/js/pages/home.js` — updated: featured cars section shows skeleton while loading, friendly error card + Retry button if API fails; Retry re-fetches and re-renders.
+- `client/assets/cars.json` — **not deleted**; seed script still reads it.
 
 ### Phase 3a Deliverables (Completed):
 - `client/js/api.js` — shared fetch helper (base URL `http://localhost:5000`, Bearer token, `{success,data}` envelope unwrap, `ApiError` with `fieldErrors`, 401 handler slot).
@@ -258,13 +273,7 @@ MAIN2.0/
 ---
 
 ## 7. What Is Next
-- **Phase 3b: Booking Form**:
-  - Wire the existing booking form in `client/` to `POST /api/bookings`.
-  - Live date picker with server-blocked dates from `GET /api/cars/:slug/booked-dates`.
-  - Hub selector driven by `config/hubs.js` for the chosen city.
-  - Live client-side price preview (days × rate + tax + deposit).
-  - Aadhaar (12-digit, first digit 2–9) and DL (format `AA00AA0000000`) inputs with client-side validation.
-- **Phase 3c: My Bookings**:
+- **Phase 3d: My Bookings**:
   - Replace the Bookings page placeholder with live data from `GET /api/bookings/mine`.
   - Trip cards with booking reference, dates, hub, status badge, and cost summary.
 

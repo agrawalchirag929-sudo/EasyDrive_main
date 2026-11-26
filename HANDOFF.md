@@ -4,7 +4,7 @@
 > **Type:** Full-Stack Self-Drive Car Rental Platform (Indian Mobility Market)  
 > **Target Audience:** Placement interview showcase / Student CV portfolio for Chirag (India, IST)  
 > **Architecture:** Clean Vanilla JS Single-Page Application (SPA) frontend + Node.js/Express/MongoDB REST API backend  
-> **Status:** Phase 1 Frontend Complete & Audited; Phase 2 Backend Complete (65/65 tests pass); **Phase 3a Auth Integration Complete**; Ready for Phase 3b  
+> **Status:** Phase 1 Frontend Complete & Audited; Phase 2 Backend Complete (65/65 tests pass); **Phase 3a Auth + Phase 3b Catalogue from API + Phase 3c Booking Form Complete**; Ready for Phase 3d  
 
 ---
 
@@ -32,7 +32,7 @@ EasyDrive is a production-grade, full-stack car rental booking web application d
 | **Theme System (Dark/Light)** | **Done** | Implemented in `client/js/state.js` and `client/css/tokens.css`. Defaults to dark mode (`#0B1218`), toggleable to light mode (`#F5F3EE`), synced with `<meta name="theme-color">`, wrapped in safe `try/catch` with an in-memory `Map` fallback. |
 | **12-Car Fleet Dataset & Images** | **Done** | Stored in `client/assets/cars.json` and `client/assets/cars/*.webp`. All 12 local WebP images processed to uniform 800x500 px via `tools/process_cars.py` with `#F4EFE9` studio backdrop. |
 | **Home Page Layout** | **Done** | Centered hero with two-line headline ("Easy to book. Easy to drive." / "Unrestricted freedom."), quick search bar, honest metrics with count-up animation, featured vehicles grid, 8-tile "Choose your city" strip, 3-step "How It Works" workflow, and demo footer. |
-| **Catalogue & Filtering** | **Done** | Category pills (All, Hatchback, Sedan, SUV, MPV, EV, Luxury), multi-city availability checking `car.cities[]`, debounced keyword search across brand/model/type, sort dropdowns, singular/plural grammar, and empty state with "Clear filters". |
+| **Catalogue & Filtering** | **Done (Phase 3b)** | Filters (city, category, search, sort) call `GET /api/cars` with AbortController. First load shows skeletons; filter changes dim existing cards until new results arrive; API error → error card + Retry button. |
 | **Compare Dock & Modal** | **Done** | Floating dock active only on `#home` and `#catalogue` when 2+ cars are selected (max 3). Adds 140px bottom clearance to prevent overlapping. Modal features full spec matrix, focus trap, and Escape listener cleanup. |
 | **Quick View Modal** | **Done** | Modal displaying detailed car specs, daily rate, deposit, mileage, features list, photo credit, accessible focus trap, and Escape listener cleanup. |
 | **Interaction Effects** | **Done** | 6 performant interactions in `effects.css` and `effects.js`: card hover zoom, page fade & slide, image fade-in with skeleton shimmer, button press feedback, sticky filter bar (>=900px), and card cursor spotlight. Full `prefers-reduced-motion` support. |
@@ -40,8 +40,8 @@ EasyDrive is a production-grade, full-stack car rental booking web application d
 | **Repository `.gitignore`** | **Done** | Contains `node_modules/`, `.env`, `.env.*`, `!.env.example`, `.DS_Store`, `*.log`, `Thumbs.db`, `.vscode/`. Security tracking audit verified clean. |
 | **Auth UI (Login / Sign Up)** | **Done (Phase 3a)** | Sign-in / create-account dialog (`authDialog.js`, `auth.css`): tabs, focus trap, Esc, inline field errors, server fieldErrors mapped to fields, loading state, toast on success. Sidebar shows avatar+name+logout when logged in. |
 | **Auth Session** | **Done (Phase 3a)** | `api.js` fetch helper + `auth.js` session manager. `restoreSession()` called at boot before sidebar renders. Safe `localStorage` with in-memory Map fallback. 401 auto-clears session and re-opens sign-in dialog. |
-| **Booking Submission** | **Partial** | "Book" buttons now open the auth dialog when logged out; show a Phase 1 toast when logged in. Full booking form wired to API is **Phase 3b**. |
-| **My Bookings Screen** | **Partial (Phase 3a gate)** | Shows a friendly "Sign in to see your bookings" gate when logged out; Phase 1 empty-state placeholder when logged in. Full trip history is **Phase 3c**. |
+| **Booking Submission** | **Done (Phase 3c)** | "Book" button opens auth dialog when logged out; when signed in opens booking modal: city/hub selector, date picker with server-blocked dates, Aadhaar+DL inputs with client validation, live price preview, POST /api/bookings, success screen with booking reference. |
+| **My Bookings Screen** | **Partial (Phase 3a gate)** | Shows a friendly "Sign in to see your bookings" gate when logged out; placeholder when logged in. Live trip history is **Phase 3d**. |
 | **Backend REST API (`server/`)** | **Done (Phase 2)** | Express 4.21, Mongoose 8.9, JWT auth, Zod validation, Helmet, CORS, rate-limit. 9 endpoints, 65 tests (18 suites) all passing. Full booking validation: city/hub, car-city, past-date, 30-day max, Aadhaar 2-9, DL format, whole-rupee pricing, `CAR_NOT_AVAILABLE` 409. |
 | **Razorpay Payment Gateway** | **Not Started** | Scheduled for **Phase 6** in test mode. |
 | **Admin Dashboard** | **Not Started** | Scheduled for **Phase 5** for vehicle CRUD and booking management. |
@@ -391,12 +391,26 @@ Every vehicle record contains the following properties:
 - `client/js/components/sidebar.js` — `_refreshAuthUi()` surgically swaps `#sidebar-auth-row` and `#mobile-auth-wrap` on auth change without full re-render.
 - `client/js/pages/bookings.js` — auth gate when logged out; Phase 1 placeholder when logged in.
 
-### Phase 3b: Booking Form (Next Up)
-- Wire the existing booking form to `POST /api/bookings`.
-- Live date picker with server-blocked dates from `GET /api/cars/:slug/booked-dates`.
-- Hub selector driven by city selection (hubs defined in server `config/hubs.js`).
-- Live client-side price preview (days × rate + 18% tax + deposit).
-- Aadhaar (12-digit, first digit 2–9) and DL (format `AA00AA0000000`) inputs with client-side validation.
+### Phase 3b: Catalogue & Home from API (Completed ✅)
+- `client/js/api.js` — added `adaptCar(apiCar)` (maps `slug→id`), `fetchCars(filters, {signal})`, `fetchCar(slug)`.
+- `client/js/app.js` — replaced `fetch('./assets/cars.json')` with `fetchCars()`. On error logs a short message and keeps `state.cars = []`; each page shows its own error UI.
+- `client/js/pages/catalogue.js` — fully rewritten. City/category/search/sort filters all send `GET /api/cars?city=&category=&q=&sort=` to the API. `AbortController` cancels stale requests on rapid filter changes. First load: skeleton loaders. Subsequent filter changes: dims existing cards (opacity 0.4) while new request is in-flight. API error: friendly error card + Retry button. Empty result: "No vehicles match…" + "Clear filters". Count text, sticky filter bar, pills, Phase 1 scroll-reveal and image effects all preserved.
+- `client/js/pages/home.js` — updated: featured cars section shows skeletons while loading, error card + Retry button if API fails (Retry re-fetches and re-renders). `import { fetchCars }` added.
+- `client/assets/cars.json` — **not deleted**; seed script reads it.
+
+### Phase 3c: Booking Form (Completed ✅)
+- `client/js/api.js` — added `fetchBookedDates(slug)` and `createBooking(payload)` (uses `authPost`, never logs Aadhaar/DL/token).
+- `client/js/components/bookingModal.js` — new accessible booking modal: city select (filtered to car.cities[]), hub select (driven by CITY_HUBS mirror), date picker with min/max and 30-day cap, Aadhaar (12-digit, first digit 2–9) + DL (4–20 alphanumeric) inputs, live price preview (subtotal + 18% GST estimate, **no deposit line**), server-blocked date conflict check, `POST /api/bookings` submit, success confirmation screen showing only server-returned values (`bookingReference`, `durationDays`, `subtotal`, `taxAmount`, `totalCost`, `aadhaarLast4`, `dlLast4`). Aadhaar and DL are zeroed from state and DOM immediately after the HTTP request completes (success or error) — they never reach localStorage, sessionStorage, app state, the URL, or console logs.
+
+> [!IMPORTANT]
+> **CITY_HUBS sync rule:** `const CITY_HUBS` at the top of `client/js/components/bookingModal.js` is a client-side mirror of `server/config/hubs.js`. Whenever hubs are added, renamed, or removed in the server config, the identical change **must** be applied to the client constant in the same commit. The two files are the single source of truth for city → hub mapping on each tier.
+- `client/js/app.js` — Book button now calls `openBookingModal(car, bookBtn)` when logged in.
+- `client/css/booking.css` — new CSS file: backdrop, panel, sections, fieldsets, inputs, price preview, success screen; responsive to 390px; `prefers-reduced-motion` support.
+- `client/index.html` — added `<link rel="stylesheet" href="css/booking.css?v=3c" />`.
+
+### Phase 3d: My Bookings (Next Up)
+- Replace the Bookings page placeholder with live data from `GET /api/bookings/mine`.
+- Trip cards with booking reference, dates, hub, status badge, and cost summary.
 
 ### Phase 4: My Bookings & Cancellation Management
 - Update `#bookings` route to display user's live bookings fetched from `GET /api/bookings`.
@@ -500,6 +514,21 @@ Start both servers, then open **http://localhost:3000** and follow these steps:
 
 > **If you see a CORS error:** confirm `CLIENT_ORIGINS=http://localhost:3000` is set in
 > `server/.env`. The default `.env.example` already includes it. Do not edit server code.
+
+### Testing Phase 3b Catalogue from API (Browser)
+
+Both servers must be running (`npm start` in `server/`, `node client-server.js` from project root).
+
+1. Open **http://localhost:3000** → navigate to **#catalogue**.
+2. Confirm **12 cars** load (skeleton loaders show briefly, then all 12 cards appear).
+3. Set city filter to **"Kolkata"** → Mahindra Thar must **not** appear (it doesn't serve Kolkata).
+4. Set city to **"All"**, type **"fortuner"** in the search box → only the Toyota Fortuner appears after the 300 ms debounce.
+5. Clear search, sort by **"Price: Low to High"** → Maruti Swift (₹1,399/day) should be first.
+6. Click any **city tile** on the Home page (e.g. "Mumbai") → navigates to `#catalogue` pre-filtered to Mumbai.
+7. **Error state test:** Stop the API (`Ctrl+C` in the server terminal), then click **Retry** in the catalogue error card → error message appears, Retry button is present.
+8. Restart the API → click Retry → 12 cars reload correctly.
+9. Confirm **Quick View**, **Compare**, **Favourite**, and **theme toggle** still work normally.
+10. Test at **390 px** viewport width → filter bar collapses, cards stack to 1 column, all features work.
 
 ---
 

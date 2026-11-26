@@ -3,7 +3,7 @@
  * -----------------------------------------------------------
  * Root entry point for the frontend SPA:
  * - Bootstraps design tokens and system/stored theme settings
- * - Loads 12-car fleet data from assets/cars.json
+ * - Loads 12-car fleet from the backend API (GET /api/cars)
  * - Mounts persistent sidebar & mobile navigation
  * - Initializes client-side hash router
  * - Global event delegation: Quick View modal, Compare toggles, Favorites
@@ -17,6 +17,7 @@ import { openQuickViewModal } from './components/carCard.js';
 import { showToast } from './components/toast.js';
 import { initInteractionEffects } from './effects.js';
 import { restoreSession } from './auth.js';
+import { fetchCars } from './api.js';
 
 /**
  * Initializes the EasyDrive application.
@@ -37,17 +38,18 @@ async function initApp() {
     renderSidebar(sidebarContainer);
   }
 
-  // 4. Load fleet data (12 Indian cars)
+  // 4. Load fleet from backend API (Phase 3b)
+  //    fetchCars() with no filters returns the full active fleet.
+  //    On error, state.cars stays [] so skeleton loaders keep showing
+  //    and each page renders its own error state with a Retry button.
   try {
-    const response = await fetch('./assets/cars.json');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const cars = await fetchCars();
+    setCars(cars);
+  } catch (err) {
+    if (err && err.name !== 'AbortError') {
+      console.error('[EasyDrive] Failed to load fleet from API:', err.message);
+      setCars([]); // keep state clean; pages will show their error UI
     }
-    const carsData = await response.json();
-    setCars(carsData);
-  } catch (error) {
-    console.error('Failed to load fleet data:', error);
-    showToast('Failed to load vehicle catalogue. Please check file server.', 'error');
   }
 
   // 5. Initialize client-side router
@@ -77,7 +79,7 @@ async function initApp() {
  * Global event listener using event delegation.
  */
 function registerGlobalEvents() {
-  document.addEventListener('click', (e) => {
+  document.addEventListener('click', async (e) => {
     // 1. Quick View Modal Trigger
     const qvBtn = e.target.closest('[data-action="quickview"]');
     if (qvBtn) {
@@ -136,7 +138,7 @@ function registerGlobalEvents() {
       return;
     }
 
-    // 4. "Book" Button — requires sign-in (Phase 3a gate)
+    // 4. "Book" Button — requires sign-in; opens booking modal (Phase 3c)
     const bookBtn = e.target.closest('[data-action="book"]');
     if (bookBtn) {
       const { isLoggedIn } = await import('./auth.js');
@@ -148,13 +150,12 @@ function registerGlobalEvents() {
       const carId = bookBtn.getAttribute('data-car-id');
       const { cars } = getState();
       const car = cars.find(c => c.id === carId);
-      const carName = car ? `${car.brand} ${car.name}` : 'Selected vehicle';
-
-      showToast(
-        `Selected ${carName}. Full booking flow connects in Phase 3b!`,
-        'success',
-        3500
-      );
+      if (!car) {
+        showToast('Car details not available. Please refresh and try again.', 'warning', 3000);
+        return;
+      }
+      const { openBookingModal } = await import('./components/bookingModal.js');
+      openBookingModal(car, bookBtn);
       return;
     }
   });
