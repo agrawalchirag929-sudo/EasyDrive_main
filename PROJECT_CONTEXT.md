@@ -220,7 +220,7 @@ MAIN2.0/
 | **Phase 3a** | Frontend Auth Integration: `api.js` fetch helper, `auth.js` session management, auth dialog UI (sign-in / create-account, focus trap), sidebar auth state, Bookings auth gate. | **Completed** |
 | **Phase 3b** | Catalogue & Home from API: `fetchCars` / `fetchCar` in `api.js`; app.js loads fleet from `GET /api/cars`; catalogue filters (city, category, search, sort) call API; AbortController; skeleton/dim/error states; Retry button. | **Completed** |
 | **Phase 3c** | Booking form modal wired to `POST /api/bookings`: city+hub selector, date picker, blocked dates from API, Aadhaar/DL client validation, live price preview, success screen. | **Completed** |
-| **Phase 3d** | My Bookings page: `GET /api/bookings/mine` history, trip cards with status badges. | Pending |
+| **Phase 3d** | My Bookings page: `GET /api/bookings/mine` history, trip cards with status badges. | **Completed** |
 | **Phase 4** | My Bookings, Cancellation flow, QR code confirmation, downloadable PDF/HTML invoice, skeleton loaders, toast notifications. | Pending |
 | **Phase 5** | Admin Dashboard: Car CRUD, booking management, platform analytics, reviews system, dark/light theme polish. | Pending |
 | **Phase 6** | Razorpay Payment Integration (Test Mode). | Pending |
@@ -229,8 +229,13 @@ MAIN2.0/
 ---
 
 ## 6. Current Phase Status
-- **Current Phase:** Phase 3d (Ready to Start).
-- **Status:** Phase 3c booking form modal complete. Phase 3b catalogue/home from API complete. Phase 3a auth integration complete. Phase 2 backend complete. All **65 tests pass** (0 failures, 18 suites).
+- **Current Phase:** Phase 4 (Ready to Start).
+- **Status:** Phase 3d My Bookings complete. Phase 3c booking form modal complete. Phase 3b catalogue/home from API complete. Phase 3a auth integration complete. Phase 2 backend complete. All **65 tests pass** (0 failures, 18 suites).
+
+### Phase 3d Deliverables (Completed):
+- `client/js/api.js` — added `fetchMyBookings()` using `authGet('/api/bookings/mine')`.
+- `client/js/pages/bookings.js` — fully rewritten: fetches live bookings on every visit; skeleton loaders; trip cards (car image from fleet, copy-reference button, UTC-formatted dates, Indian rupee totals, status + payment badges, masked Aadhaar/DL last-4); empty state; error + Retry; 401 → auth gate.
+- `client/css/booking.css` — appended trip card styles, responsive to 390px.
 
 ### Phase 3c Deliverables (Completed):
 - `client/js/api.js` — added `fetchBookedDates(slug)` and `createBooking(payload)`. Aadhaar/DL never logged.

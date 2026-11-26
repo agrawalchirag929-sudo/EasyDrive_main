@@ -4,7 +4,7 @@
 > **Type:** Full-Stack Self-Drive Car Rental Platform (Indian Mobility Market)  
 > **Target Audience:** Placement interview showcase / Student CV portfolio for Chirag (India, IST)  
 > **Architecture:** Clean Vanilla JS Single-Page Application (SPA) frontend + Node.js/Express/MongoDB REST API backend  
-> **Status:** Phase 1 Frontend Complete & Audited; Phase 2 Backend Complete (65/65 tests pass); **Phase 3a Auth + Phase 3b Catalogue from API + Phase 3c Booking Form Complete**; Ready for Phase 3d  
+> **Status:** Phase 1 Frontend Complete & Audited; Phase 2 Backend Complete (65/65 tests pass); **Phase 3a–3d Complete**; Ready for Phase 4  
 
 ---
 
@@ -41,7 +41,7 @@ EasyDrive is a production-grade, full-stack car rental booking web application d
 | **Auth UI (Login / Sign Up)** | **Done (Phase 3a)** | Sign-in / create-account dialog (`authDialog.js`, `auth.css`): tabs, focus trap, Esc, inline field errors, server fieldErrors mapped to fields, loading state, toast on success. Sidebar shows avatar+name+logout when logged in. |
 | **Auth Session** | **Done (Phase 3a)** | `api.js` fetch helper + `auth.js` session manager. `restoreSession()` called at boot before sidebar renders. Safe `localStorage` with in-memory Map fallback. 401 auto-clears session and re-opens sign-in dialog. |
 | **Booking Submission** | **Done (Phase 3c)** | "Book" button opens auth dialog when logged out; when signed in opens booking modal: city/hub selector, date picker with server-blocked dates, Aadhaar+DL inputs with client validation, live price preview, POST /api/bookings, success screen with booking reference. |
-| **My Bookings Screen** | **Partial (Phase 3a gate)** | Shows a friendly "Sign in to see your bookings" gate when logged out; placeholder when logged in. Live trip history is **Phase 3d**. |
+| **My Bookings Screen** | **Done (Phase 3d)** | Live trip cards from `GET /api/bookings/mine` — car image, name, reference with copy button, hub, dates, duration, total, status + payment badges, masked Aadhaar/DL last-4. Loading skeletons, empty state, error + Retry, 401 auto-clear to auth gate. |
 | **Backend REST API (`server/`)** | **Done (Phase 2)** | Express 4.21, Mongoose 8.9, JWT auth, Zod validation, Helmet, CORS, rate-limit. 9 endpoints, 65 tests (18 suites) all passing. Full booking validation: city/hub, car-city, past-date, 30-day max, Aadhaar 2-9, DL format, whole-rupee pricing, `CAR_NOT_AVAILABLE` 409. |
 | **Razorpay Payment Gateway** | **Not Started** | Scheduled for **Phase 6** in test mode. |
 | **Admin Dashboard** | **Not Started** | Scheduled for **Phase 5** for vehicle CRUD and booking management. |
@@ -408,9 +408,10 @@ Every vehicle record contains the following properties:
 - `client/css/booking.css` — new CSS file: backdrop, panel, sections, fieldsets, inputs, price preview, success screen; responsive to 390px; `prefers-reduced-motion` support.
 - `client/index.html` — added `<link rel="stylesheet" href="css/booking.css?v=3c" />`.
 
-### Phase 3d: My Bookings (Next Up)
-- Replace the Bookings page placeholder with live data from `GET /api/bookings/mine`.
-- Trip cards with booking reference, dates, hub, status badge, and cost summary.
+### Phase 3d: My Bookings (Completed ✅)
+- `client/js/api.js` — added `fetchMyBookings()` (uses `authGet`; returns `data.bookings[]` newest-first).
+- `client/js/pages/bookings.js` — fully rewritten: fetches on every visit; loading skeletons (3 cards); trip cards with car image (from loaded fleet by `carSlug`, neutral SVG placeholder if missing), car name, booking reference + copy button (toast "Reference copied"), pickup city + hub, start/end dates formatted with `timeZone:'UTC'` to prevent IST day-shift, duration, total (Indian rupee grouping), status badge, payment badge, masked Aadhaar/DL last-4. Empty state with "Explore Cars" link. Error state with Retry. 401 → auth gate. Logged-out gate unchanged from Phase 3a.
+- `client/css/booking.css` — appended trip card styles: `.trip-card`, `.trip-list`, `.trip-badges`, `.trip-badge--*`, `.trip-copy-btn`, `.trip-details`, `.trip-identity-note`, responsive to 390px.
 
 ### Phase 4: My Bookings & Cancellation Management
 - Update `#bookings` route to display user's live bookings fetched from `GET /api/bookings`.
